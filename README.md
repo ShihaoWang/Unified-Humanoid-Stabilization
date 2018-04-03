@@ -1,0 +1,1 @@
+# Snopt Matlab Initialization
