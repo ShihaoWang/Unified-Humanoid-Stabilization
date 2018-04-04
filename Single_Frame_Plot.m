@@ -1,69 +1,22 @@
-function Animation_Fn(q_tot, handles)
-
-p = Humanoid_Physical_Parameter();
-
-
-[m,n] = size(q_tot);
-
-% This function is used to plot the animation of a given configuration(s)
-
-linklength = p.l;
-
-if (n ==1)
-    q_tot = q_tot';
-    Robot_Config_Plot(q_tot, linklength, handles)
-else
-    for i = 1:m
-        q_array_i = q_tot(i,:);
-        Robot_Config_Plot(q_array_i, linklength, handles);
-    end
-end
-end
-
-function Robot_Config_Plot(q_array, linklength, handles)
-
-axes_plot = handles.axes3;
+function Single_Frame_Plot(q_array_i, P)
 
 % This function plot the robot configuration given the current q_array
-rIx = q_array(1);    rIy = q_array(2);   theta = q_array(3);
-q1 = q_array(4);     q2 = q_array(5);    q3 = q_array(6);
-q4 = q_array(7);     q5 = q_array(8);    q6 = q_array(9);
-q7 = q_array(10);    q8 = q_array(11);   q9 = q_array(12);    q10 = q_array(13);
+rIx = q_array_i(1);    rIy = q_array_i(2);   theta = q_array_i(3);
+q1 = q_array_i(4);     q2 = q_array_i(5);    q3 = q_array_i(6);
+q4 = q_array_i(7);     q5 = q_array_i(8);    q6 = q_array_i(9);
+q7 = q_array_i(10);    q8 = q_array_i(11);  
 
-AngxIK = theta;
-AngxIH = -(2 * pi - theta - q3);
-AngxIF = -(2 * pi - theta - q4);
-AngIFx = pi + AngxIF;
-AngIHx = pi + AngxIH;
-AngxFE = -(2 * pi - AngIFx - q5);
-AngFEx = pi + AngxFE;
-AngxBA = -(q6 - AngFEx);
-AngxHG = -(2 * pi - AngIHx  -q2);
-AngHGx = pi + AngxHG;
-AngxDC = -(q1 - AngHGx);
-AngxJL = -(pi - AngxIK - q9);
-AngJLx = pi + AngxJL;
-AngMLx = q10 - (pi - AngJLx);
-AngxJN = -(q7 + q9 -AngxJL);
-AngJNx = pi + AngxJN;
-AngxNO = -(pi - q8 - AngJNx);
-
-rI = [rIx, rIy]';
-rIF = linklength(3) * lamdadirection(AngxIF);
-rF = rI + rIF;
-rE = linklength(2) * lamdadirection(AngxFE) + rF;
-rA = 1/2 * linklength(1) * lamdadirection(AngxBA) + rE;
-rB = 1/2 * linklength(1) * lamdadirection(pi + AngxBA) + rE;
-rH = rI + linklength(3) * lamdadirection(AngxIH);
-rG = rH + linklength(2) * lamdadirection(AngxHG);
-rC = rG + 1/2 * linklength(1) * lamdadirection(AngxDC);
-rD = rG - 1/2 * linklength(1) * lamdadirection(AngxDC);
-rJ = rI + linklength(4) * lamdadirection(AngxIK);
-rK = rJ + linklength(5) * lamdadirection(AngxIK);
-rL = rJ + linklength(6) * lamdadirection(AngxJL);
-rM = rL + linklength(7) * lamdadirection(AngMLx);
-rN = rJ + linklength(6) * lamdadirection(AngxJN);
-rO = rN + linklength(7) * lamdadirection(AngxNO);
+rA_fn = P.rA_fn;%@(q1,q2,rIx,rIy,theta)
+rB_fn = P.rB_fn;%@(q3,q4,rIx,rIy,theta)
+rC_fn = P.rC_fn;%@(q5,q6,rIx,rIy,theta)
+rD_fn = P.rD_fn;%@(q7,q8,rIx,rIy,theta)
+rE_fn = P.rE_fn;%@(q1,rIx,rIy,theta)
+P.rF_fn = matlabFunction(rF);%@(q3,rIx,rIy,theta)
+P.rG_fn = matlabFunction(rG);%@(q5,rIx,rIy,theta)
+P.rH_fn = matlabFunction(rH);%@(q7,rIx,rIy,theta)
+P.rI_fn = matlabFunction(rI);%@(rIx,rIy)
+P.rJ_fn = matlabFunction(rJ);%@(rIx,rIy,theta)
+P.rK_fn = matlabFunction(rK);%@(rIx,rIy,theta)
 
 link_color = [8 128 224] ./ 255;
 Linewidth_Coef = 2.5;

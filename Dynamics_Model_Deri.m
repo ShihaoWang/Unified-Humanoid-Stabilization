@@ -26,7 +26,6 @@ AngxHD = AngxJH + q8;
 
 l_shank = p.l(1);       l_thigh = p.l(2);       l_body = p.l(3);        l_arm = p.l(4);         l_forearm = p.l(5);     
     
-
 KJ2JI = p.KJ2JI;
 
 rI = [rIx, rIy]';
@@ -116,13 +115,15 @@ V = V_EA + V_FB + V_IE + V_IF + V_IJ + V_JH + V_HD + V_JG + V_GC;
 
 T = simplify(T);
 V = simplify(V);
+T_fn = matlabFunction(T);
+V_fn = matlabFunction(V);
+
+P.T_fn = T_fn;
+P.V_fn = V_fn;
+Q.T = T;
+Q.V = V; 
 
 u = [u1 u2 u3 u4 u5 u6 u7 u8]'; 
-
-Q.T = T;
-
-T_fn = matlabFunction(T);
-P.T_fn = T_fn;
 
 L = T - V;
 pL_pq = simplify(jacobian(L, q));
@@ -135,100 +136,64 @@ D_q = jacobian(Eqn, qddot);
 B_q = -jacobian(Eqn, u);
 C_q_qdot = simplify(Eqn - D_q * qddot + B_q * u);
 
+D_q_fn = matlabFunction(D_q);%@(q1,q2,q3,q4,q5,q6,q7,q8,theta)
+B_q_fn = matlabFunction(B_q);
+C_q_qdot_fn = matlabFunction(C_q_qdot);%@(q1,q2,q3,q4,q5,q6,q7,q8,q1dot,q2dot,q3dot,q4dot,q5dot,q6dot,q7dot,q8dot,thetadot,theta)
+
+P.D_q_fn = D_q_fn;
+P.B_q_fn = B_q_fn;
+P.C_q_qdot_fn = C_q_qdot_fn;
+
 Q.D_q = D_q;
 Q.B_q = B_q;
 Q.C_q_qdot = C_q_qdot;
 
 % Now let us come to the computation of the full dynamics constraint jacobian matrix
 
-syms rAx rAy rBx rBy rCx rCy rDx rDy rMx rMy rOx rOy real
+syms rAx rAy rBx rBy rCx rCy rDx rDy real
 Phi_A = [rAx; rAy] - rA;
 Phi_B = [rBx; rBy] - rB;
 Phi_C = [rCx; rCy] - rC;
 Phi_D = [rDx; rDy] - rD;
-Phi_M = [rMx; rMy] - rM;
-Phi_O = [rOx; rOy] - rO;
 
-Phi_Eqn = [-Phi_A; -Phi_B; -Phi_C; -Phi_D; -Phi_M; -Phi_O];
+Phi_Eqn = [-Phi_A; -Phi_B; -Phi_C; -Phi_D];
 Jac_Full = jacobian(Phi_Eqn, q);
+P.Jac_Full_fn = matlabFunction(Jac_Full); %@(q1,q2,q3,q4,q5,q6,q7,q8,theta)
 Q.Jac_Full = Jac_Full;
-
-P.Phi_A_fn = matlabFunction(Phi_A); %@(q4,q5,q6,rAx,rAy,rIx,rIy,theta)
-P.Phi_B_fn = matlabFunction(Phi_B); %@(q4,q5,q6,rBx,rBy,rIx,rIy,theta)
-P.Phi_C_fn = matlabFunction(Phi_C); %@(q1,q2,q3,rCx,rCy,rIx,rIy,theta)
-P.Phi_D_fn = matlabFunction(Phi_D); %@(q1,q2,q3,rDx,rDy,rIx,rIy,theta)
-P.Phi_M_fn = matlabFunction(Phi_M); %@(q9,q10,rIx,rIy,rMx,rMy,theta)
-P.Phi_O_fn = matlabFunction(Phi_O); %@(q7,q8,rIx,rIy,rOx,rOy,theta)
-
-P.Jac_Full_fn = matlabFunction(Jac_Full); %@(q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,theta)
 
 Jac_Full_dot_Eqn = simplify(jacobian(Jac_Full * qdot, [q;qdot]) * [qdot;qddot]);
 Jacdot_qdot = simplify(Jac_Full_dot_Eqn - Jac_Full * qddot);
 
+P.Jacdot_qdot_fn = matlabFunction(Jacdot_qdot); %@(q1,q2,q3,q4,q5,q6,q7,q8,q1dot,q2dot,q3dot,q4dot,q5dot,q6dot,q7dot,q8dot,thetadot,theta)
+
 Q.Jac_Full_dot_Eqn = Jac_Full_dot_Eqn; 
 Q.Jacdot_qdot = Jacdot_qdot;
 
-P.Jacdot_qdot_fn = matlabFunction(Jacdot_qdot); %@(q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q10dot,q1dot,q2dot,q3dot,q4dot,q5dot,q6dot,q7dot,q8dot,q9dot,thetadot,theta)
+P.rA_fn = matlabFunction(rA);%@(q1,q2,rIx,rIy,theta)
+P.rB_fn = matlabFunction(rB);%@(q3,q4,rIx,rIy,theta)
+P.rC_fn = matlabFunction(rC);%@(q5,q6,rIx,rIy,theta)
+P.rD_fn = matlabFunction(rD);%@(q7,q8,rIx,rIy,theta)
+P.rE_fn = matlabFunction(rE);%@(q1,rIx,rIy,theta)
+P.rF_fn = matlabFunction(rF);%@(q3,rIx,rIy,theta)
+P.rG_fn = matlabFunction(rG);%@(q5,rIx,rIy,theta)
+P.rH_fn = matlabFunction(rH);%@(q7,rIx,rIy,theta)
+P.rI_fn = matlabFunction(rI);%@(rIx,rIy)
+P.rJ_fn = matlabFunction(rJ);%@(rIx,rIy,theta)
+P.rK_fn = matlabFunction(rK);%@(rIx,rIy,theta)
 
-D_q_fn = matlabFunction(D_q);%@(q2,q3,q4,q5,q7,q8,q9,q10,theta)
-B_q_fn = matlabFunction(B_q);
-C_q_qdot_fn = matlabFunction(C_q_qdot);%@(q2,q3,q4,q5,q7,q8,q9,q10,q10dot,q2dot,q3dot,q4dot,q5dot,q7dot,q8dot,q9dot,thetadot,theta)
-
-rA_fn = matlabFunction(rA);%@(q4,q5,q6,rIx,rIy,theta)
-rB_fn = matlabFunction(rB);%@(q4,q5,q6,rIx,rIy,theta)
-rC_fn = matlabFunction(rC);%@(q1,q2,q3,rIx,rIy,theta)
-rD_fn = matlabFunction(rD);%@(q1,q2,q3,rIx,rIy,theta)
-rE_fn = matlabFunction(rE);%@(q4,q5,rIx,rIy,theta)
-rF_fn = matlabFunction(rF);%@(q4,rIx,rIy,theta)
-rG_fn = matlabFunction(rG);%@(q2,q3,rIx,rIy,theta)
-rH_fn = matlabFunction(rH);%@(q3,rIx,rIy,theta)
-rI_fn = matlabFunction(rI);%@(rIx,rIy)
-rJ_fn = matlabFunction(rJ);%@(rIx,rIy,theta)
-rK_fn = matlabFunction(rK);%@(rIx,rIy,theta)
-rL_fn = matlabFunction(rL);%@(q9,rIx,rIy,theta)
-rM_fn = matlabFunction(rM);%@(q9,q10,rIx,rIy,theta)
-rN_fn = matlabFunction(rN);%@(q7,rIx,rIy,theta)
-rO_fn = matlabFunction(rO);%@(q7,q8,rIx,rIy,theta)
-
-P.vA_fn = matlabFunction(vA);  %@(q4,q5,q6,q4dot,q5dot,q6dot,rIxdot,rIydot,thetadot,theta)
-P.vB_fn = matlabFunction(vB);  %@(q4,q5,q6,q4dot,q5dot,q6dot,rIxdot,rIydot,thetadot,theta)
-P.vC_fn = matlabFunction(vC);  %@(q1,q2,q3,q1dot,q2dot,q3dot,rIxdot,rIydot,thetadot,theta)
-P.vD_fn = matlabFunction(vD);  %@(q1,q2,q3,q1dot,q2dot,q3dot,rIxdot,rIydot,thetadot,theta)
-P.vE_fn = matlabFunction(vE);  %@(q4,q5,q4dot,q5dot,rIxdot,rIydot,thetadot,theta)
-P.vF_fn = matlabFunction(vF);  %@(q4,q4dot,rIxdot,rIydot,thetadot,theta)
-P.vG_fn = matlabFunction(vG);  %@(q2,q3,q2dot,q3dot,rIxdot,rIydot,thetadot,theta)
-P.vH_fn = matlabFunction(vH);  %@(q3,q3dot,rIxdot,rIydot,thetadot,theta)
+P.vA_fn = matlabFunction(vA);  %@(q1,q2,q1dot,q2dot,rIxdot,rIydot,thetadot,theta)
+P.vB_fn = matlabFunction(vB);  %@(q3,q4,q3dot,q4dot,rIxdot,rIydot,thetadot,theta)
+P.vC_fn = matlabFunction(vC);  %@(q5,q6,q5dot,q6dot,rIxdot,rIydot,thetadot,theta)
+P.vD_fn = matlabFunction(vD);  %@(q7,q8,q7dot,q8dot,rIxdot,rIydot,thetadot,theta)
+P.vE_fn = matlabFunction(vE);  %@(q1,q1dot,rIxdot,rIydot,thetadot,theta)
+P.vF_fn = matlabFunction(vF);  %@(q3,q3dot,rIxdot,rIydot,thetadot,theta)
+P.vG_fn = matlabFunction(vG);  %@(q5,q5dot,rIxdot,rIydot,thetadot,theta)
+P.vH_fn = matlabFunction(vH);  %@(q7,q7dot,rIxdot,rIydot,thetadot,theta)
 P.vI_fn = matlabFunction(vI);  %@(rIxdot,rIydot)
 P.vJ_fn = matlabFunction(vJ);  %@(rIxdot,rIydot,thetadot,theta)
-P.vK_fn = matlabFunction(vK);  %@(rIxdot,rIydot,thetadot,theta)
-P.vL_fn = matlabFunction(vL);  %@(q9,q9dot,rIxdot,rIydot,thetadot,theta)
-P.vM_fn = matlabFunction(vM);  %@(q9,q10,q10dot,q9dot,rIxdot,rIydot,thetadot,theta)
-P.vN_fn = matlabFunction(vN);  %@(q7,q7dot,rIxdot,rIydot,thetadot,theta)
-P.vO_fn = matlabFunction(vO);  %@(q7,q8,q7dot,q8dot,rIxdot,rIydot,thetadot,theta)
-
-P.D_q_fn = D_q_fn;
-P.B_q_fn = B_q_fn;
-P.C_q_qdot_fn = C_q_qdot_fn;
-
-P.rA_fn = rA_fn;
-P.rB_fn = rB_fn;
-P.rC_fn = rC_fn;
-P.rD_fn = rD_fn;
-P.rE_fn = rE_fn;
-P.rF_fn = rF_fn;
-P.rG_fn = rG_fn;
-P.rH_fn = rH_fn;
-P.rI_fn = rI_fn;
-P.rJ_fn = rJ_fn;
-P.rK_fn = rK_fn;
-P.rL_fn = rL_fn;
-P.rM_fn = rM_fn;
-P.rN_fn = rN_fn;
-P.rO_fn = rO_fn;
 
 save('Pre_Load_Structure.mat','P');
 save('Symbolic_Structure.mat','Q');
-
 end
 
 function [T_i, V_i] = Kinematics_Cal(Angxi, Angxi_name, q, qdot, r_vec, v_vec, p)
@@ -305,5 +270,17 @@ evalc(['r_vel_2 = ' Edge_vel_2]);
 
 T_i = 1/2 * link_mass * dot(0.5 * (r_vel_1 + r_vel_2), 0.5 * (r_vel_1 + r_vel_2)) + 1/2 * link_inertia * dot(AngRatexi,AngRatexi);
 V_i = link_mass * 9.81 * (r_pos_1(2) + r_pos_2(2))/2;
+
+end
+
+function lamda_vec = lamdadirection(theta)
+
+% This function is used to generate the unit direction vector under a given
+% angle
+
+% This angle is computed with respect to the horizontal line and the
+% counterclockwise direction is the positive direction
+
+lamda_vec = [cos(theta), sin(theta)].';
 
 end
