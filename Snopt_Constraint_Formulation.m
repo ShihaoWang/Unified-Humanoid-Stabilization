@@ -4,7 +4,7 @@ function Snopt_Constraint_Formulation()
 % This function is used to generate the constraint in a SNOPT-friendly way
 load('Pre_Load_Structure.mat');
 
-init_contas = [1 0];  
+init_contas = [1 1];  
 P.init_contas = init_contas;
 rIx        = 0;             rIxlow = -Inf;          rIxupp = Inf;
 rIy        = 0.5;           rIylow = 0;             rIyupp = Inf;
@@ -32,17 +32,25 @@ q8dot      = 0.5;
 
 x0 = [rIx rIy theta q1 q2 q3 q4 q5 q6 q7 q8 ...
     rIxdot rIydot thetadot q1dot q2dot q3dot q4dot q5dot q6dot q7dot q8dot];
-
-Single_Frame_Plot(x0, P)
+P.x0 = x0;
+% Single_Frame_Plot(x0, P)
 init_lb = [ rIxlow rIylow thetalow q1low q2low q3low q4low q5low q6low q7low q8low ];
 init_ub = [ rIxupp rIyupp thetaupp q1upp q2upp q3upp q4upp q5upp q6upp q7upp q8upp ];
 
-fmincon_opt = optimoptions('fmincon','Algorithm','sqp');
-init_objective = @(z,P) 1;
-x = fmincon(init_objective,x0,[],[],[],[],init_lb,init_ub,@init_constraint,fmincon_opt, P);
-figure
+fmincon_opt = optimoptions('fmincon','Algorithm','sqp','display','off');
+x = fmincon(@Init_Objective,x0,[],[],[],[],init_lb,init_ub,@Init_Constraint,fmincon_opt, P);
+% figure
 Single_Frame_Plot(x, P);
 
+load('Symbolic_Structure.mat');
 
+% There are three options can be customerized
+mode_sequence = [1 0; 0 1];
+gait_balance_flag = 1;     % flag: 1 for gait, 2 for stabilization 
+grids_per_segment = 12;
+
+Q.gait_balance_flag = gait_balance_flag;
+Q.grids_per_segment = grids_per_segment; 
+Constraint_Script_Gene(mode_sequence, x, Q);
 
 end

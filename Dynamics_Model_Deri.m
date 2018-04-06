@@ -166,6 +166,10 @@ Jacdot_qdot = simplify(Jac_Full_dot_Eqn - Jac_Full * qddot);
 
 P.Jacdot_qdot_fn = matlabFunction(Jacdot_qdot); %@(q1,q2,q3,q4,q5,q6,q7,q8,q1dot,q2dot,q3dot,q4dot,q5dot,q6dot,q7dot,q8dot,thetadot,theta)
 
+Q.State_No = length(D_q);
+[~,Q.Ctrl_No] = size(B_q);
+[Q.ConF_No,~] = size(Jac_Full);
+
 Q.Jac_Full_dot_Eqn = Jac_Full_dot_Eqn; 
 Q.Jacdot_qdot = Jacdot_qdot;
 
