@@ -10,14 +10,14 @@ l_shank = 0.325;        l_thigh = 0.325;            l_body = 0.55;
 l_arm = 0.25;           l_forearm = 0.45;           
 l_foot = 0.225;         l_heel = 0.1;               l_head = 0.15;
 
-p.l = [l_shank; l_thigh; l_body; l_forearm; l_arm];
+p.l = [l_shank; l_thigh; l_body; l_forearm; l_arm; l_foot];
 
 % The mass of the humanoid link
 m_shank = 2.4;          m_thigh = 4;                m_body = 27;
 m_arm = 3.5;            m_forearm = 2.1;            
 m_foot = 1.6;    
 
-p.m = [m_shank; m_thigh; m_body; m_forearm; m_arm];
+p.m = [m_shank; m_thigh; m_body; m_forearm; m_arm; m_foot];
 
 p.I = 1/12 * p.m .* p.l.* p.l;
 
@@ -40,12 +40,14 @@ AngxHG = AngxIH - q2;
 AngxGMAB = AngxHG - q3;
 AngxGB = 2 * pi + AngxGMAB - pi/4;
 AngxGA = AngxGMAB + alpha;
+AngxAB = pi + AngxGA + pi/2 - alpha;
 
 AngxIK = -(pi/2 + theta + q4);
 AngxKJ = AngxIK - q5;
 AngxJMCD = AngxKJ - q6;
 AngxJD = AngxJMCD - pi/4;
 AngxJC = AngxJD + alpha;
+AngxCD = pi + AngxJC + pi/2 - alpha;
 
 AngxLM = -(pi/2 + theta + q7);
 AngxME = AngxLM - q8;
@@ -159,8 +161,11 @@ Q.vN = vN;
 [T_LN, V_LN] = Kinematics_Cal(AngxLN, 'AngxLN', q, qdot, r_vec, v_vec, p);
 [T_NF, V_NF] = Kinematics_Cal(AngxNF, 'AngxNF', q, qdot, r_vec, v_vec, p);
 
-T = T_IH + T_HG + T_IK + T_KJ + T_IL + T_LM + T_ME + T_LN + T_NF;
-V = V_IH + V_HG + V_IK + V_KJ + V_IL + V_LM + V_ME + V_LN + V_NF;
+[T_AB, V_AB] = Kinematics_Cal(AngxAB, 'AngxAB', q, qdot, r_vec, v_vec, p);
+[T_CD, V_CD] = Kinematics_Cal(AngxCD, 'AngxCD', q, qdot, r_vec, v_vec, p);
+
+T = T_IH + T_HG + T_IK + T_KJ + T_IL + T_LM + T_ME + T_LN + T_NF + T_AB + T_CD;
+V = V_IH + V_HG + V_IK + V_KJ + V_IL + V_LM + V_ME + V_LN + V_NF + V_AB + V_CD;
 
 T = simplify(T);
 V = simplify(V);
@@ -199,21 +204,15 @@ Q.C_q_qdot = C_q_qdot;
 
 % Now let us come to the computation of the full dynamics constraint jacobian matrix
 
-syms rAx rAy rBx rBy rCx rCy rDx rDy real
-Phi_A = [rAx; rAy] - rA;
-Phi_B = [rBx; rBy] - rG;
-Phi_C = [rCx; rCy] - rC;
-Phi_D = [rDx; rDy] - rD;
-
-Phi_Eqn = [-Phi_A; -Phi_B; -Phi_C; -Phi_D];
+Phi_Eqn = [rA; rB;  rC; rD; rE; rF];
 Jac_Full = jacobian(Phi_Eqn, q);
-P.Jac_Full_fn = matlabFunction(Jac_Full); %@(q1,q2,q3,q4,q5,q6,q7,q8,theta)
+P.Jac_Full_fn = matlabFunction(Jac_Full);
 Q.Jac_Full = Jac_Full;
 
 Jac_Full_dot_Eqn = simplify(jacobian(Jac_Full * qdot, [q;qdot]) * [qdot;qddot]);
 Jacdot_qdot = simplify(Jac_Full_dot_Eqn - Jac_Full * qddot);
 
-P.Jacdot_qdot_fn = matlabFunction(Jacdot_qdot); %@(q1,q2,q3,q4,q5,q6,q7,q8,q1dot,q2dot,q3dot,q4dot,q5dot,q6dot,q7dot,q8dot,thetadot,theta)
+P.Jacdot_qdot_fn = matlabFunction(Jacdot_qdot); 
 
 Q.State_No = length(D_q);
 [~,Q.Ctrl_No] = size(B_q);
@@ -222,28 +221,28 @@ Q.State_No = length(D_q);
 Q.Jac_Full_dot_Eqn = Jac_Full_dot_Eqn; 
 Q.Jacdot_qdot = Jacdot_qdot;
 
-P.rA_fn = matlabFunction(rA);%@(q1,q2,rIx,rIy,theta)
-P.rB_fn = matlabFunction(rG);%@(q3,q4,rIx,rIy,theta)
-P.rC_fn = matlabFunction(rC);%@(q5,q6,rIx,rIy,theta)
-P.rD_fn = matlabFunction(rD);%@(q7,q8,rIx,rIy,theta)
-P.rE_fn = matlabFunction(rK);%@(q1,rIx,rIy,theta)
-P.rF_fn = matlabFunction(rH);%@(q3,rIx,rIy,theta)
-P.rG_fn = matlabFunction(rG);%@(q5,rIx,rIy,theta)
-P.rH_fn = matlabFunction(rH);%@(q7,rIx,rIy,theta)
-P.rI_fn = matlabFunction(rI);%@(rIx,rIy)
-P.rJ_fn = matlabFunction(rJ);%@(rIx,rIy,theta)
-P.rK_fn = matlabFunction(rK);%@(rIx,rIy,theta)
+P.rA_fn = matlabFunction(rA);
+P.rB_fn = matlabFunction(rG);
+P.rC_fn = matlabFunction(rC);
+P.rD_fn = matlabFunction(rD);
+P.rE_fn = matlabFunction(rK);
+P.rF_fn = matlabFunction(rH);
+P.rG_fn = matlabFunction(rG);
+P.rH_fn = matlabFunction(rH);
+P.rI_fn = matlabFunction(rI);
+P.rJ_fn = matlabFunction(rJ);
+P.rK_fn = matlabFunction(rK);
 
-P.vA_fn = matlabFunction(vA);  %@(q1,q2,q1dot,q2dot,rIxdot,rIydot,thetadot,theta)
-P.vB_fn = matlabFunction(vB);  %@(q3,q4,q3dot,q4dot,rIxdot,rIydot,thetadot,theta)
-P.vC_fn = matlabFunction(vC);  %@(q5,q6,q5dot,q6dot,rIxdot,rIydot,thetadot,theta)
-P.vD_fn = matlabFunction(vD);  %@(q7,q8,q7dot,q8dot,rIxdot,rIydot,thetadot,theta)
-P.vE_fn = matlabFunction(vE);  %@(q1,q1dot,rIxdot,rIydot,thetadot,theta)
-P.vF_fn = matlabFunction(vF);  %@(q3,q3dot,rIxdot,rIydot,thetadot,theta)
-P.vG_fn = matlabFunction(vG);  %@(q5,q5dot,rIxdot,rIydot,thetadot,theta)
-P.vH_fn = matlabFunction(vH);  %@(q7,q7dot,rIxdot,rIydot,thetadot,theta)
-P.vI_fn = matlabFunction(vI);  %@(rIxdot,rIydot)
-P.vJ_fn = matlabFunction(vJ);  %@(rIxdot,rIydot,thetadot,theta)
+P.vA_fn = matlabFunction(vA);  
+P.vB_fn = matlabFunction(vB);  
+P.vC_fn = matlabFunction(vC);  
+P.vD_fn = matlabFunction(vD); 
+P.vE_fn = matlabFunction(vE); 
+P.vF_fn = matlabFunction(vF); 
+P.vG_fn = matlabFunction(vG); 
+P.vH_fn = matlabFunction(vH); 
+P.vI_fn = matlabFunction(vI);  
+P.vJ_fn = matlabFunction(vJ);  
 
 save('Pre_Load_Structure.mat','P');
 save('Symbolic_Structure.mat','Q');
@@ -252,8 +251,11 @@ end
 function [T_i, V_i] = Kinematics_Cal(Angxi, Angxi_name, q, qdot, r_vec, v_vec, p)
 % This function is used to calculate the kinematics of a given link
 
-m_shank = p.m(1);       m_thigh = p.m(2);       m_body = p.m(3);        m_arm = p.m(4);         m_forearm = p.m(5);     
-I_shank = p.I(1);       I_thigh = p.I(2);       I_body = p.I(3);        I_arm = p.I(4);         I_forearm = p.I(5); 
+m_shank = p.m(1);       m_thigh = p.m(2);       m_body = p.m(3);       
+m_arm = p.m(4);         m_forearm = p.m(5);     m_foot = p.m(6);  
+
+I_shank = p.I(1);       I_thigh = p.I(2);       I_body = p.I(3);        
+I_arm = p.I(4);         I_forearm = p.I(5);     I_foot = p.I(6); 
 
 rA = r_vec(1:2,:);
 rB = r_vec(3:4,:);
@@ -288,10 +290,13 @@ vN = v_vec(27:28,:);
 mIL = m_body;
 mHG = m_shank;          mKJ = mHG;          mIH = m_thigh;          mIK = mIH;
 mLM = m_arm;            mLN = mLM;          mME = m_forearm;        mNF = mME;
+mAB = m_foot;           mCD = mAB;
+
 
 IIL = I_body;
 IHG = I_shank;          IKJ = IHG;          IIH = I_thigh;          IIK = IIH;
 ILM = I_arm;            ILN = ILM;          IME = I_forearm;        INF = IME;
+IAB = I_foot;           ICD = IAB;
 
 AngRatexi = jacobian(Angxi, q) * qdot;
 i = 1;
