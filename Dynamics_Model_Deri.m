@@ -221,28 +221,36 @@ Q.State_No = length(D_q);
 Q.Jac_Full_dot_Eqn = Jac_Full_dot_Eqn; 
 Q.Jacdot_qdot = Jacdot_qdot;
 
-P.rA_fn = matlabFunction(rA);
-P.rB_fn = matlabFunction(rG);
-P.rC_fn = matlabFunction(rC);
-P.rD_fn = matlabFunction(rD);
-P.rE_fn = matlabFunction(rK);
-P.rF_fn = matlabFunction(rH);
-P.rG_fn = matlabFunction(rG);
-P.rH_fn = matlabFunction(rH);
-P.rI_fn = matlabFunction(rI);
-P.rJ_fn = matlabFunction(rJ);
-P.rK_fn = matlabFunction(rK);
+P.rA_fn = matlabFunction(rA);%@(q1,q2,q3,rIx,rIy,theta)
+P.rB_fn = matlabFunction(rG);%@(q1,q2,rIx,rIy,theta)
+P.rC_fn = matlabFunction(rC);%@(q4,q5,q6,rIx,rIy,theta)
+P.rD_fn = matlabFunction(rD);%@(q4,q5,q6,rIx,rIy,theta)
+P.rE_fn = matlabFunction(rK);%@(q4,rIx,rIy,theta)
+P.rF_fn = matlabFunction(rH);%@(q1,rIx,rIy,theta)
+P.rG_fn = matlabFunction(rG);%@(q1,q2,rIx,rIy,theta)
+P.rH_fn = matlabFunction(rH);%@(q1,rIx,rIy,theta)
+P.rI_fn = matlabFunction(rI);%@(rIx,rIy)
+P.rJ_fn = matlabFunction(rJ);%@(q4,q5,rIx,rIy,theta)
+P.rK_fn = matlabFunction(rK);%@(q4,rIx,rIy,theta)
+P.rL_fn = matlabFunction(rL);%@(rIx,rIy,theta)
+P.rM_fn = matlabFunction(rM);%@(q7,rIx,rIy,theta)
+P.rN_fn = matlabFunction(rN);%@(q9,rIx,rIy,theta)
+P.rT_fn = matlabFunction(rT);%@(rIx,rIy,theta)
 
-P.vA_fn = matlabFunction(vA);  
-P.vB_fn = matlabFunction(vB);  
-P.vC_fn = matlabFunction(vC);  
-P.vD_fn = matlabFunction(vD); 
-P.vE_fn = matlabFunction(vE); 
-P.vF_fn = matlabFunction(vF); 
-P.vG_fn = matlabFunction(vG); 
-P.vH_fn = matlabFunction(vH); 
-P.vI_fn = matlabFunction(vI);  
-P.vJ_fn = matlabFunction(vJ);  
+P.vA_fn = matlabFunction(vA);%@(q1,q2,q3,q1dot,q2dot,q3dot,rIxdot,rIydot,thetadot,theta)
+P.vB_fn = matlabFunction(vB);%@(q1,q2,q3,q1dot,q2dot,q3dot,rIxdot,rIydot,thetadot,theta)  
+P.vC_fn = matlabFunction(vC);%@(q4,q5,q6,q4dot,q5dot,q6dot,rIxdot,rIydot,thetadot,theta)  
+P.vD_fn = matlabFunction(vD);%@(q4,q5,q6,q4dot,q5dot,q6dot,rIxdot,rIydot,thetadot,theta)
+P.vE_fn = matlabFunction(vE);%@(q7,q8,q7dot,q8dot,rIxdot,rIydot,thetadot,theta) 
+P.vF_fn = matlabFunction(vF);%@(q9,q10,q10dot,q9dot,rIxdot,rIydot,thetadot,theta) 
+P.vG_fn = matlabFunction(vG);%@(q1,q2,q1dot,q2dot,rIxdot,rIydot,thetadot,theta) 
+P.vH_fn = matlabFunction(vH);%@(q1,q1dot,rIxdot,rIydot,thetadot,theta) 
+P.vI_fn = matlabFunction(vI);%@(rIxdot,rIydot)
+P.vJ_fn = matlabFunction(vJ);%@(q4,q5,q4dot,q5dot,rIxdot,rIydot,thetadot,theta)  
+P.vK_fn = matlabFunction(vK);%@(q4,q4dot,rIxdot,rIydot,thetadot,theta)  
+P.vL_fn = matlabFunction(vL);%@(rIxdot,rIydot,thetadot,theta)  
+P.vM_fn = matlabFunction(vM);%@(q7,q7dot,rIxdot,rIydot,thetadot,theta)  
+P.vN_fn = matlabFunction(vN);%@(q9,q9dot,rIxdot,rIydot,thetadot,theta)  
 
 save('Pre_Load_Structure.mat','P');
 save('Symbolic_Structure.mat','Q');
