@@ -4,8 +4,11 @@ function p = Humanoid_Physical_Parameter()
 % Assume that the mass is propotional to the link length
 
 % The item sequence is [foot, shank, thigh, body ,head, arm, forearm]
-l_shank = 0.25;        l_thigh = 0.25;            l_body = 0.3;
-l_arm = 0.2;           l_forearm = 0.2;
+
+l_shank = 0.325;        l_thigh = 0.325;            l_body = 0.55;
+l_arm = 0.25;           l_forearm = 0.45;           
+l_foot = 0.225;         l_heel = 0.1;
+
 p.l = [l_shank; l_thigh; l_body; l_forearm; l_arm];
 
 l2m = 15;  % 1m is 10 kg
