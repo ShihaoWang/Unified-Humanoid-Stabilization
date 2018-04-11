@@ -1,6 +1,4 @@
 function Snopt_Constraint_Formulation()
-
-
 % This function is used to generate the constraint in a SNOPT-friendly way
 load('Pre_Load_Structure.mat');
 

@@ -30,24 +30,24 @@ syms u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 real
 
 % Foot geometry
 l_foot_back = sqrt(2) * l_heel;
-l_foot_front = ((l_foot - l_heel)^2 + l_heel^2)^(-1/2);
-alpha = atan(l_foot/l_heel);
+l_foot_front = ((l_foot - l_heel)^2 + l_heel^2)^(1/2);
+alpha = atan((l_foot - l_heel)/l_heel);
 
-AngxIL = -theta; 
+AngxIL = -theta+pi/2; 
 AngxIT = AngxIL;
 AngxIH = -(pi/2 + theta + q1);
 AngxHG = AngxIH - q2;
 AngxGMAB = AngxHG - q3;
 AngxGB = 2 * pi + AngxGMAB - pi/4;
 AngxGA = AngxGMAB + alpha;
-AngxAB = pi + AngxGA + pi/2 - alpha;
+AngxAB = AngxGMAB + pi/2 + pi;
 
 AngxIK = -(pi/2 + theta + q4);
 AngxKJ = AngxIK - q5;
 AngxJMCD = AngxKJ - q6;
 AngxJD = AngxJMCD - pi/4;
-AngxJC = AngxJD + alpha;
-AngxCD = pi + AngxJC + pi/2 - alpha;
+AngxJC = AngxJMCD + alpha;
+AngxCD = AngxJMCD - pi/2;
 
 AngxLM = -(pi/2 + theta + q7);
 AngxME = AngxLM - q8;
@@ -92,11 +92,11 @@ rF = rN + rNF;
 
 % Here Q is a structure used to save the symbolic expression
 Q.rA = rA;
-Q.rB = rG;
+Q.rB = rB;
 Q.rC = rC;
 Q.rD = rD;
-Q.rE = rK;
-Q.rF = rH;
+Q.rE = rE;
+Q.rF = rF;
 Q.rG = rG;
 Q.rH = rH;
 Q.rI = rI;
@@ -190,9 +190,9 @@ D_q = jacobian(Eqn, qddot);
 B_q = -jacobian(Eqn, u);
 C_q_qdot = simplify(Eqn - D_q * qddot + B_q * u);
 
-D_q_fn = matlabFunction(D_q);%@(q1,q2,q3,q4,q5,q6,q7,q8,theta)
+D_q_fn = matlabFunction(D_q); 
 B_q_fn = matlabFunction(B_q);
-C_q_qdot_fn = matlabFunction(C_q_qdot);%@(q1,q2,q3,q4,q5,q6,q7,q8,q1dot,q2dot,q3dot,q4dot,q5dot,q6dot,q7dot,q8dot,thetadot,theta)
+C_q_qdot_fn = matlabFunction(C_q_qdot); 
 
 P.D_q_fn = D_q_fn;
 P.B_q_fn = B_q_fn;
@@ -222,11 +222,11 @@ Q.Jac_Full_dot_Eqn = Jac_Full_dot_Eqn;
 Q.Jacdot_qdot = Jacdot_qdot;
 
 P.rA_fn = matlabFunction(rA);%@(q1,q2,q3,rIx,rIy,theta)
-P.rB_fn = matlabFunction(rG);%@(q1,q2,rIx,rIy,theta)
+P.rB_fn = matlabFunction(rB);%@(q1,q2,rIx,rIy,theta)
 P.rC_fn = matlabFunction(rC);%@(q4,q5,q6,rIx,rIy,theta)
 P.rD_fn = matlabFunction(rD);%@(q4,q5,q6,rIx,rIy,theta)
-P.rE_fn = matlabFunction(rK);%@(q4,rIx,rIy,theta)
-P.rF_fn = matlabFunction(rH);%@(q1,rIx,rIy,theta)
+P.rE_fn = matlabFunction(rE);%@(q7,q8,rIx,rIy,theta)
+P.rF_fn = matlabFunction(rF);%@(q9,q10,rIx,rIy,theta)
 P.rG_fn = matlabFunction(rG);%@(q1,q2,rIx,rIy,theta)
 P.rH_fn = matlabFunction(rH);%@(q1,rIx,rIy,theta)
 P.rI_fn = matlabFunction(rI);%@(rIx,rIy)
