@@ -123,7 +123,7 @@ for i = 1:m
     
     Mech_Engy_i = T_i + V_i;
     Mech_Engy = [Mech_Engy; Mech_Engy_i];
-    Mech_Engy_Hor = [Mech_Engy_Hor; i]
+    Mech_Engy_Hor = [Mech_Engy_Hor; i];
     
 end
 

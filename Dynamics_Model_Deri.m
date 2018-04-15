@@ -10,6 +10,8 @@ l_shank = 0.325;        l_thigh = 0.325;            l_body = 0.55;
 l_arm = 0.25;           l_forearm = 0.45;           
 l_foot = 0.225;         l_heel = 0.1;               l_head = 0.15;
 
+P.Leg_Length = l_shank + l_thigh; 
+
 p.l = [l_shank; l_thigh; l_body; l_forearm; l_arm; l_foot];
 
 % The mass of the humanoid link
@@ -106,6 +108,14 @@ Q.rL = rL;
 Q.rM = rM;
 Q.rN = rN;
 Q.rT = rT;
+
+rCOM_num = ((rA + rB)/2 + (rC + rD)/2)* m_foot + ((rG + rH)/2 + (rK + rJ)/2) * m_shank + ...
+        ((rH + rI)/2 + (rI + rK)/2)* m_thigh + (rI + rL)/2 * m_body + ...
+        ((rL + rM)/2 + (rL + rN)/2)* m_arm + ((rM + rE)/2 + (rN + rF)/2) * m_forearm;
+rCOM_den = 2 * (m_foot + m_shank + m_thigh + m_arm + m_forearm) + m_body;       
+rCOM = simplify(rCOM_num/rCOM_den);
+P.rCOM_fn = matlabFunction(rCOM);
+Q.rCOM = rCOM;
 
 r_vec = [rA;  rB;  rC;  rD;  rE;  rF;  rG;  rH;  rI;  rJ;  rK;  rL;  rM;  rN];
 
@@ -332,7 +342,6 @@ Edge_pos_2 = strcat('r',r2);
 Edge_vel_1 = strcat('v',r1);
 Edge_vel_2 = strcat('v',r2);
 
-
 evalc(['link_mass = ' mass_name]);
 evalc(['link_inertia = ' Inertia_name]);
 evalc(['r_pos_1 = ' Edge_pos_1]);
@@ -340,7 +349,6 @@ evalc(['r_pos_2 = ' Edge_pos_2]);
 
 evalc(['r_vel_1 = ' Edge_vel_1]);
 evalc(['r_vel_2 = ' Edge_vel_2]);
-
 
 T_i = 1/2 * link_mass * dot(0.5 * (r_vel_1 + r_vel_2), 0.5 * (r_vel_1 + r_vel_2)) + 1/2 * link_inertia * dot(AngRatexi,AngRatexi);
 V_i = link_mass * 9.81 * (r_pos_1(2) + r_pos_2(2))/2;

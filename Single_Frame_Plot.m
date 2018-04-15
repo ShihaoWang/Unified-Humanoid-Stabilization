@@ -27,21 +27,21 @@ r_vec = [rA; rB; rC; rD; rE; rF; rG; rH; rI; rJ; rK; rL; rM; rN; rT];
 
 
 axes_plot = axes;
-link_plot_2points('AB',r_vec,axes_plot);
-link_plot_2points('AG',r_vec,axes_plot);
-link_plot_2points('GB',r_vec,axes_plot);
-link_plot_2points('GH',r_vec,axes_plot);
-link_plot_2points('HI',r_vec,axes_plot);
-link_plot_2points('IK',r_vec,axes_plot);
-link_plot_2points('KJ',r_vec,axes_plot);
-link_plot_2points('JC',r_vec,axes_plot);
-link_plot_2points('JD',r_vec,axes_plot);
-link_plot_2points('CD',r_vec,axes_plot);
-link_plot_2points('IT',r_vec,axes_plot);
-link_plot_2points('LN',r_vec,axes_plot);
-link_plot_2points('NF',r_vec,axes_plot);
-link_plot_2points('LM',r_vec,axes_plot);
-link_plot_2points('ME',r_vec,axes_plot);
+link_plot_2points('AB',r_vec,axes_plot,'r');
+link_plot_2points('AG',r_vec,axes_plot,'r');
+link_plot_2points('GB',r_vec,axes_plot,'r');
+link_plot_2points('GH',r_vec,axes_plot,'r');
+link_plot_2points('HI',r_vec,axes_plot,'r');
+link_plot_2points('IK',r_vec,axes_plot,'l');
+link_plot_2points('KJ',r_vec,axes_plot,'l');
+link_plot_2points('JC',r_vec,axes_plot,'l');
+link_plot_2points('JD',r_vec,axes_plot,'l');
+link_plot_2points('CD',r_vec,axes_plot,'l');
+link_plot_2points('IT',r_vec,axes_plot,'m');
+link_plot_2points('LN',r_vec,axes_plot,'l');
+link_plot_2points('NF',r_vec,axes_plot,'l');
+link_plot_2points('LM',r_vec,axes_plot,'r');
+link_plot_2points('ME',r_vec,axes_plot,'r');
 
 MarkSize_Coef = 5;
 MarkerEdgeColor_Coef = [28 148 149] ./ 255;
@@ -64,14 +64,17 @@ for i = 1:14
             'MarkerFaceColor',MarkerFaceColor_Coef);  hold on;
     end
 end
+
 axis(axes_plot, 'equal');
 hold(axes_plot,'off');
 
 end
 
-function link_plot_2points(Edges,r_vec,axes_plot)
+function link_plot_2points(Edges,r_vec,axes_plot,side)
 
-link_color = [8 128 224] ./ 255;
+left_color = [24 193 8] ./ 255;
+midl_color = [255 24 22] ./ 255;
+rght_color = [8 128 224] ./ 255;
 Linewidth_Coef = 2.5;
 
 for i = 1:14  
@@ -84,6 +87,19 @@ rT = r_vec(end-1:end,:);
 evalc(['Edge1', ' = ', strcat('r',Edges(1))]);
 evalc(['Edge2', ' = ', strcat('r',Edges(2))]);
 
-plot(axes_plot, [Edge1(1),Edge2(1)]',[Edge1(2),Edge2(2)]','LineWidth',Linewidth_Coef, 'color', link_color);
+if nargin<3
+    plot(axes_plot, [Edge1(1),Edge2(1)]',[Edge1(2),Edge2(2)]','LineWidth',Linewidth_Coef, 'color', left_color);
+    hold(axes_plot,'on');
+else
+    if side =='l'
+        plot(axes_plot, [Edge1(1),Edge2(1)]',[Edge1(2),Edge2(2)]','LineWidth',Linewidth_Coef, 'color', left_color);
+    else
+        if side == 'r'
+            plot(axes_plot, [Edge1(1),Edge2(1)]',[Edge1(2),Edge2(2)]','LineWidth',Linewidth_Coef, 'color', rght_color);
+        else
+             plot(axes_plot, [Edge1(1),Edge2(1)]',[Edge1(2),Edge2(2)]','LineWidth',Linewidth_Coef, 'color', midl_color);       
+        end
+    end
+end
 hold(axes_plot,'on');
 end
