@@ -28,7 +28,7 @@ P.Opt_Var_UppBd = Opt_Var_UppBd_i;
 
 [Opt_Seed, Opt_Lowbd, Opt_Uppbd, P]= Seed_Guess_Gene(sigma_i, x_i, sigma_i_child, P);
 
-Nodes_Connectivity_Opt = optimoptions(@fmincon,'Display','iter','Algorithm','sqp','MaxIterations',2500,'OptimalityTolerance',1e-8,'MaxFunctionEvaluations',10000);
+Nodes_Connectivity_Opt = optimoptions(@fmincon,'Display','iter','Algorithm','sqp','MaxIterations',2500,'OptimalityTolerance',1e-8,'MaxFunctionEvaluations',inf);
 
 Var_Opt = fmincon(@Nodes_Connectivity_Obj,Opt_Seed,[],[],[],[],Opt_Lowbd,Opt_Uppbd,@Nodes_Connectivity_Constraint,Nodes_Connectivity_Opt, P);
 

@@ -1,4 +1,4 @@
-function Single_Frame_Plot(q_array_i, P)
+function Single_Frame_Plot(q_array_i, P, axes_plot)
 
 % This function plot the robot configuration given the current q_array
 rIx = q_array_i(1);    rIy = q_array_i(2);   theta = q_array_i(3);
@@ -24,9 +24,9 @@ rN = P.rN_fn(q9,rIx,rIy,theta);
 rT = P.rT_fn(rIx,rIy,theta);
 
 r_vec = [rA; rB; rC; rD; rE; rF; rG; rH; rI; rJ; rK; rL; rM; rN; rT];
-
-
-axes_plot = axes;
+if nargin <3 
+    axes_plot = axes;
+end
 link_plot_2points('AB',r_vec,axes_plot,'r');
 link_plot_2points('AG',r_vec,axes_plot,'r');
 link_plot_2points('GB',r_vec,axes_plot,'r');
@@ -102,4 +102,6 @@ else
     end
 end
 hold(axes_plot,'on');
+% axes_plot.Visible = 'off';
+
 end
