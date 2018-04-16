@@ -294,5 +294,4 @@ x0_All(8+13) = x_Sim(6+7);
 x0_All(9+13) = x_Sim(7+7);
 
 x0_Opt = x0_All;
-
 end

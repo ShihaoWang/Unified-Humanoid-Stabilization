@@ -40,7 +40,7 @@ if nargin<3
     t = [Envi_Map_Point_A_x Envi_Map_Point_B_x];
     y = [Envi_Map_Point_A_y Envi_Map_Point_B_y];
     [~,m,b] = regression(t,y,'one');  % y = m*x + b
-    Dist_i_Sign = Point_i(2) - (m * Point_i(1) + b);
+    Dist_i_Sign = sign(Point_i(2) - (m * Point_i(1) + b));
     v1 = [Envi_Map_Point_B_x Envi_Map_Point_B_y 0]';
     v2 = [Envi_Map_Point_A_x Envi_Map_Point_A_y 0]';
     pt = [Point_i(1) Point_i(2) 0]';
