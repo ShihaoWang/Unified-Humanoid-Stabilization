@@ -12,7 +12,8 @@ theta = -0.09;
 q1 = 0.45;
 q2 = 0.06;
 q3 = 0.15;
-q4 = -0.6;
+% q4 = -0.6;
+q4 = -1;
 q5 = 0.15;
 q6 = 0.27;
 q7 = -0.66;
@@ -71,7 +72,7 @@ RobotState_LowBd = [rIxlow rIylow thetalow q1low q2low q3low q4low q5low q6low q
     rIxdotlow rIydotlow thetadotlow q1dotlow q2dotlow q3dotlow q4dotlow q5dotlow q6dotlow q7dotlow q8dotlow q9dotlow q10dotlow];
 RobotState_UppBd = [rIxupp rIyupp thetaupp q1upp q2upp q3upp q4upp q5upp q6upp q7upp q8upp q9upp q10upp...
     rIxdotupp rIydotupp thetadotupp q1dotupp q2dotupp q3dotupp q4dotupp q5dotupp q6dotupp q7dotupp q8dotupp q9dotupp q10dotupp];
-Init_Opt = optimoptions(@fmincon,'Display','off','Algorithm','sqp','MaxIterations',1500);
+Init_Opt = optimoptions(@fmincon,'Display','off','Algorithm','sqp','MaxIterations',inf);
 P.Init_Foot = 1;            % This is AB on the ground
 % P.Init_Foot = 2;          % This is CD on the ground
 
@@ -101,6 +102,15 @@ q1dot = x0_Opt(4+13);           q2dot = x0_Opt(5+13);           q3dot = x0_Opt(6
 q4dot = x0_Opt(7+13);           q5dot = x0_Opt(8+13);           q6dot = x0_Opt(9+13);
 q7dot = x0_Opt(10+13);          q8dot = x0_Opt(11+13);          q9dot = x0_Opt(12+13);
 q10dot = x0_Opt(13+13);
+
+P.rIx_ref = rIx;            P.rIy_ref = rIy;            P.theta_ref = theta;
+P.q1_ref = q1;              P.q2_ref = q2;              P.q3_ref = q3;
+P.q4_ref = q4;              P.q5_ref = q5;              P.q6_ref = q6;
+P.q7_ref = q7;              P.q8_ref = q8;              P.q9_ref = q9;          P.q10_ref = q10;
+P.rIxdot_ref = rIxdot;            P.rIydot_ref = rIydot;            P.thetadot_ref = thetadot;
+P.q1dot_ref = q1dot;              P.q2dot_ref = q2dot;              P.q3dot_ref = q3dot;
+P.q4dot_ref = q4dot;              P.q5dot_ref = q5dot;              P.q6dot_ref = q6dot;
+P.q7dot_ref = q7dot;              P.q8dot_ref = q8dot;              P.q9dot_ref = q9dot;          P.q10dot_ref = q10dot;
 
 P.rA_ref = P.rA_fn(q1,q2,q3,rIx,rIy,theta);
 P.rB_ref = P.rB_fn(q1,q2,q3,rIx,rIy,theta);
