@@ -30,7 +30,7 @@ Envi_Map_Point_B_x = Envi_Map_i(3);
 Envi_Map_Point_B_y = Envi_Map_i(4);
 if nargin<3 
     if Envi_Map_Point_A_x == Envi_Map_Point_B_x        
-        Dist_i = Envi_Map_Point_A_x - Point_i(2);       
+        Dist_i = Envi_Map_Point_A_x - Point_i(1);       
         return
     end
     if Envi_Map_Point_A_y == Envi_Map_Point_B_y

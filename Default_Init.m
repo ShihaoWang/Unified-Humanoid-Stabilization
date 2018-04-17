@@ -52,6 +52,8 @@ q8low = -2.391;                 q8upp = 0.0;
 q9low = -3.14;                  q9upp = 1.047;
 q10low = -2.391;                q10upp = 0.0;
 
+P.Step_Length = P.Leg_Length * (abs(sin(q1low)) + abs(sin(q1upp)));
+
 AngRateLow = -3.0;              AngRateHgh = 3.0;
 
 rIxdotlow = -Inf;               rIxdotupp = Inf;
