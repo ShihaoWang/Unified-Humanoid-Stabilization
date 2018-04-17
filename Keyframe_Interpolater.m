@@ -8,8 +8,8 @@ State_Traj = reshape(State_Traj, 26, length(State_Traj)/26);
 Ctrl_Traj = Var_Opt(26*Frame_No+2:end,:);
 Ctrl_Traj = reshape(Ctrl_Traj, 10, length(Ctrl_Traj)/10);
 
-Time_Span = linspace(0,Time, Frame_No);
-Time_Span_Inte = linspace(0, Time, 1 * Frame_No);
+Exp_Rate = 5;Time_Span = linspace(0,Time, Frame_No);
+Time_Span_Inte = linspace(0, Time, Exp_Rate * Frame_No);
 
 State_Traj_Inte = spline(Time_Span, State_Traj,Time_Span_Inte);
 Ctrl_Traj_Inte = spline(Time_Span, Ctrl_Traj,Time_Span_Inte);
@@ -17,7 +17,9 @@ Ctrl_Traj_Inte = spline(Time_Span, Ctrl_Traj,Time_Span_Inte);
 %% HRP2 path file generation
 Path_File = []; 
 
-fid = fopen('hrp2_7.run','wt');
+filename = ['hrp2_' num2str(Exp_Rate) 'x.path'];
+
+fid = fopen(filename,'wt');
 
 for i = 1:length(Time_Span_Inte)
     State_Traj_i = State_Traj_Inte(:,i);
