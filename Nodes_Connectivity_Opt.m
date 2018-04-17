@@ -11,7 +11,7 @@ function Nodes_Connectivity_Opt(sigma_i, x_i, sigma_i_child, P)
 P.sigma_i = sigma_i;
 P.sigma_i_child = sigma_i_child; 
 P.x_i = x_i;
-P.Ctrl_No = 30;
+P.Ctrl_No = 40;
 P.eps = 0.001;
 
 P.Tme_Seed = 2;
