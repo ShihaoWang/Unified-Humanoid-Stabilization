@@ -5,8 +5,10 @@ function [P, sigma0, x0_Opt] = Default_Init(varargin)
 load('Pre_Load_Structure.mat');
 
 P = Envi_Map_Defi(P);
+mini = 0.05;
+P.mini = mini;
 
-rIx = 0;
+rIx = 4;
 rIy = 1;
 theta = -0.09;
 q1 = 0.45;
@@ -75,8 +77,8 @@ RobotState_LowBd = [rIxlow rIylow thetalow q1low q2low q3low q4low q5low q6low q
 RobotState_UppBd = [rIxupp rIyupp thetaupp q1upp q2upp q3upp q4upp q5upp q6upp q7upp q8upp q9upp q10upp...
     rIxdotupp rIydotupp thetadotupp q1dotupp q2dotupp q3dotupp q4dotupp q5dotupp q6dotupp q7dotupp q8dotupp q9dotupp q10dotupp];
 Init_Opt = optimoptions(@fmincon,'Display','off','Algorithm','sqp','MaxIterations',inf);
-P.Init_Foot = 1;            % This is AB on the ground
-% P.Init_Foot = 2;          % This is CD on the ground
+% P.Init_Foot = 1;            % This is AB on the ground
+P.Init_Foot = 2;          % This is CD on the ground
 
 P.RobotState_LowBd = RobotState_LowBd;
 P.RobotState_UppBd = RobotState_UppBd;
@@ -258,7 +260,7 @@ vD = P.vD_fn(q4,q5,q6,q4dot,q5dot,q6dot,rIxdot,rIydot,thetadot,theta);
 % vM = P.vM_fn(q7,q7dot,rIxdot,rIydot,thetadot,theta);
 % vN = P.vN_fn(q9,q9dot,rIxdot,rIydot,thetadot,theta);
 Init_Foot = P.Init_Foot;
-mini = 0.05;
+mini = P.mini;
 Tol = 2; 
 z0 = State_Sim2All(P.Refer0 , z0);
 if Init_Foot ==1  
@@ -272,6 +274,7 @@ else
     c = [c; mini - rB(2)];
     c = [c; norm(P.Refer0 - z0) - Tol];
 end
+
 end
 function x0_Opt = State_Sim2All(x0_All, x_Sim)
 
