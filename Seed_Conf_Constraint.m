@@ -54,15 +54,22 @@ vF = P.vF_fn(q9,q10,q10dot,q9dot,rIxdot,rIydot,thetadot,theta);
 sigma_offset = P.sigma_i_child - P.sigma_i; 
 P.sigma_offset = sigma_offset;
 
-sigma_i_child_AB = P.sigma_i_child(1);
-sigma_i_child_CD = P.sigma_i_child(2);
-sigma_i_child_E = P.sigma_i_child(3);
-sigma_i_child_F = P.sigma_i_child(4);
+% sigma_i_child_AB = P.sigma_i_child(1);
+% sigma_i_child_CD = P.sigma_i_child(2);
+% sigma_i_child_E = P.sigma_i_child(3);
+% sigma_i_child_F = P.sigma_i_child(4);
 
 sigma_i_AB = P.sigma_i(1);
 sigma_i_CD = P.sigma_i(2);
 sigma_i_E = P.sigma_i(3);
 sigma_i_F = P.sigma_i(4);
+
+
+sigma_i_child_AB = P.sigma_i_child(1);
+sigma_i_child_CD = P.sigma_i_child(2);
+sigma_i_child_E = P.sigma_i_child(3);
+sigma_i_child_F = P.sigma_i_child(4);
+
 %% 1. Relative distance constraints: a. all distances have to be at least on the surface; b. the desired mode has to be satisfied.
 c = [c; -Obs_Dist_Fn(rA, P.Envi_Map) + P.mini * ~sigma_i_child_AB;...
         -Obs_Dist_Fn(rB, P.Envi_Map) + P.mini * ~sigma_i_child_AB;...
@@ -81,43 +88,38 @@ ceq = [ceq; sigma_i_child_AB * rA(2); sigma_i_child_AB * vA;...
 %% 2. Contact Constraint Maintenance: the previous contacts have to be satisfied
 if max(sigma_offset)==1
     % This is a contact addition
-    if max(P.sigma_i)==1  % This is to say that the parent node has contacts
-                          % Those contacts have to be maintained
-        ceq = [ceq; sigma_i_AB * (rA - P.rA_ref);sigma_i_AB * vA;
-                    sigma_i_AB * (rB - P.rB_ref);sigma_i_AB * vB;
-                    sigma_i_CD * (rC - P.rC_ref);sigma_i_CD * vC;
-                    sigma_i_CD * (rD - P.rD_ref);sigma_i_CD * vD;
-                    sigma_i_E * (rE - P.rB_ref); sigma_i_E * vE; 
-                    sigma_i_F * (rF - P.rB_ref);sigma_i_E * vF]; 
-    end
+        ceq = [ceq; sigma_i_AB * (rA - P.rA_ref); sigma_i_AB * vA;
+                    sigma_i_AB * (rB - P.rB_ref); sigma_i_AB * vB;
+                    sigma_i_CD * (rC - P.rC_ref); sigma_i_CD * vC;
+                    sigma_i_CD * (rD - P.rD_ref); sigma_i_CD * vD;
+                    sigma_i_E * (rE - P.rB_ref);  sigma_i_E * vE; 
+                    sigma_i_F * (rF - P.rB_ref);  sigma_i_F * vF]; 
 else
     % This is a contact reduction  
-    if max(P.sigma_i)==1
         ceq = [ceq; (sigma_offset(1)==0) * sigma_i_AB * (rA - P.rA_ref); (sigma_offset(1)==0) * sigma_i_AB * vA;
                     (sigma_offset(1)==0) * sigma_i_AB * (rB - P.rB_ref); (sigma_offset(1)==0) * sigma_i_AB * vB;
                     (sigma_offset(2)==0) * sigma_i_CD * (rC - P.rC_ref); (sigma_offset(2)==0) * sigma_i_CD * vC;
                     (sigma_offset(2)==0) * sigma_i_CD * (rD - P.rD_ref); (sigma_offset(2)==0) * sigma_i_CD * vD;
                     (sigma_offset(3)==0) * sigma_i_E *  (rE - P.rB_ref); (sigma_offset(3)==0) * sigma_i_E * vE;
                     (sigma_offset(4)==0) * sigma_i_F *  (rF - P.rB_ref); (sigma_offset(4)==0) * sigma_i_F * vF]; 
-    end
 end
 %% 3. Heuristic Stability Constraints: rI and rCOM have to be lied within the support polygon
 r_Foot_Pos = [rA(1) rB(1);  rC(1) rD(1)];
 rCOM = P.rCOM_fn(q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,rIx,rIy,theta);
 % % This is the heuristic part
-if (max(P.sigma_i)==min(P.sigma_i))&&(max(P.sigma_i)==0)
+if (max(P.sigma_i) == min(P.sigma_i))&&(max(P.sigma_i) == 0)
     % There is no contact in the parent mode
     % So the robot is jumping in the air so the idea is to make sure that the center of mass align
     % with the neck position in the horizontal direction
     ceq = [ceq; rCOM(1) - rT(1)];
 else
     % There is at least one contact in the parent mode
-    if(P.sigma_i(1)==1)||(P.sigma_i(2)==1)
+    if(P.sigma_i(1)==1)||(P.sigma_i(2)==1)        
         % At least foot contact is involved
         if find(sigma_offset)<3
             % The change is also foot contact
             if (P.vI_ref(1)>0)
-                % The robot is moving forward
+                % The robot is moving forward               
                 [~,n] = find(sigma_offset);
                 Swing_Leg_Ind = n;
                 Stance_Leg_Ind = (Swing_Leg_Ind == 1)+ 1;
@@ -145,11 +147,4 @@ else
         end 
     end
 end
-end
-
-function Support_Polygon_Bd()
-
-% This function is used to calculate the boundary of the support polygon of
-% the 
-
 end

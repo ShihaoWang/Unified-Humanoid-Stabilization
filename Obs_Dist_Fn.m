@@ -51,12 +51,12 @@ if nargin<3
     Dist_i = Dist_i_Sign * Dist_i_Val;
 else
     if Direction =='x'
-        if Envi_Map_Point_A_y == Envi_Map_Point_B_y
-            Dist_i = Envi_Map_Point_A_x - Point_i(2);
+        if Envi_Map_Point_A_x == Envi_Map_Point_B_x
+            Dist_i = Envi_Map_Point_A_x - Point_i(1);
             return
         end
     else
-        if Envi_Map_Point_A_x == Envi_Map_Point_B_x
+        if Envi_Map_Point_A_y == Envi_Map_Point_B_y
             
             Dist_i = Point_i(2) - Envi_Map_Point_A_y;
             return
