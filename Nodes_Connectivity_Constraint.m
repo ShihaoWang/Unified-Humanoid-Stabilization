@@ -152,12 +152,12 @@ for i = 1:Ctrl_No
             -Obs_Dist_Fn(rE, P.Envi_Map) + P.mini * ~sigma_i_E;...
             -Obs_Dist_Fn(rF, P.Envi_Map) + P.mini * ~sigma_i_F];
     
-    ceq = [ceq; sigma_i_AB * rA(2); sigma_i_AB * vA;...
-                sigma_i_AB * rB(2); sigma_i_AB * vB;...
-                sigma_i_CD * rC(2); sigma_i_CD * vC;...
-                sigma_i_CD * rD(2); sigma_i_CD * vD;...
-                sigma_i_E * Obs_Dist_Fn(rE, P.Envi_Map, 'x'); sigma_i_E * vE;...
-                sigma_i_F * Obs_Dist_Fn(rF, P.Envi_Map, 'x'); sigma_i_F * vF];
+    ceq = [ceq; sigma_i_AB * rA(2); 
+                sigma_i_AB * rB(2);
+                sigma_i_CD * rC(2); 
+                sigma_i_CD * rD(2); 
+                sigma_i_E * Obs_Dist_Fn(rE, P.Envi_Map, 'x');
+                sigma_i_F * Obs_Dist_Fn(rF, P.Envi_Map, 'x')];
      
     c = [c; -rA(2);...
             -rB(2);...
@@ -178,20 +178,20 @@ for i = 1:Ctrl_No
     %% 4. Holonomic constraint reserved
     if max(sigma_offset)==1
         % This is a contact addition
-        ceq = [ceq; sigma_i_AB * (rA - P.rA_ref);   sigma_i_AB * vA;...
-                    sigma_i_AB * (rB - P.rB_ref);	sigma_i_AB * vB;...
-                    sigma_i_CD * (rC - P.rC_ref);	sigma_i_CD * vC;...
-                    sigma_i_CD * (rD - P.rD_ref);	sigma_i_CD * vD;...
-                    sigma_i_E *  (rE - P.rE_ref);	sigma_i_E * vE;...
-                    sigma_i_F *  (rF - P.rF_ref);   sigma_i_F * vF];
+        ceq = [ceq; sigma_i_AB * (rA - P.rA_ref);  
+                    sigma_i_AB * (rB - P.rB_ref);	
+                    sigma_i_CD * (rC - P.rC_ref);
+                    sigma_i_CD * (rD - P.rD_ref);
+                    sigma_i_E *  (rE - P.rE_ref);
+                    sigma_i_F *  (rF - P.rF_ref)];
     else
         % This is a contact reduction
-        ceq = [ceq; (sigma_offset(1)==0) * sigma_i_AB * (rA - P.rA_ref); (sigma_offset(1)==0) * sigma_i_AB * vA;
-                    (sigma_offset(1)==0) * sigma_i_AB * (rB - P.rB_ref); (sigma_offset(1)==0) * sigma_i_AB * vB;
-                    (sigma_offset(2)==0) * sigma_i_CD * (rC - P.rC_ref); (sigma_offset(2)==0) * sigma_i_CD * vC;
-                    (sigma_offset(2)==0) * sigma_i_CD * (rD - P.rD_ref); (sigma_offset(2)==0) * sigma_i_CD * vD;
-                    (sigma_offset(3)==0) * sigma_i_E *  (rE - P.rB_ref); (sigma_offset(3)==0) * sigma_i_E * vE;
-                    (sigma_offset(4)==0) * sigma_i_F *  (rF - P.rB_ref); (sigma_offset(4)==0) * sigma_i_F * vF];
+        ceq = [ceq; (sigma_offset(1)==0) * sigma_i_AB * (rA - P.rA_ref); 
+                    (sigma_offset(1)==0) * sigma_i_AB * (rB - P.rB_ref); 
+                    (sigma_offset(2)==0) * sigma_i_CD * (rC - P.rC_ref);
+                    (sigma_offset(2)==0) * sigma_i_CD * (rD - P.rD_ref); 
+                    (sigma_offset(3)==0) * sigma_i_E *  (rE - P.rB_ref); 
+                    (sigma_offset(4)==0) * sigma_i_F *  (rF - P.rB_ref)];
     end
     %% 5. Heuristic Constraint
     r_Foot_Pos = [rA(1) rB(1);

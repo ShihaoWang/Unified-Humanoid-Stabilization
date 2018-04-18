@@ -32,7 +32,7 @@ rI = P.rI_fn(rIx,rIy);
 % rL = P.rL_fn(rIx,rIy,theta);
 % rM = P.rM_fn(q7,rIx,rIy,theta);
 % rN = P.rN_fn(q9,rIx,rIy,theta);
-% rT = P.rT_fn(rIx,rIy,theta);
+rT = P.rT_fn(rIx,rIy,theta);
 
 vA = P.vA_fn(q1,q2,q3,q1dot,q2dot,q3dot,rIxdot,rIydot,thetadot,theta);
 vB = P.vB_fn(q1,q2,q3,q1dot,q2dot,q3dot,rIxdot,rIydot,thetadot,theta);
@@ -88,20 +88,20 @@ ceq = [ceq; sigma_i_child_AB * rA(2); sigma_i_child_AB * vA;...
 %% 2. Contact Constraint Maintenance: the previous contacts have to be satisfied
 if max(sigma_offset)==1
     % This is a contact addition
-        ceq = [ceq; sigma_i_AB * (rA - P.rA_ref); sigma_i_AB * vA;
-                    sigma_i_AB * (rB - P.rB_ref); sigma_i_AB * vB;
-                    sigma_i_CD * (rC - P.rC_ref); sigma_i_CD * vC;
-                    sigma_i_CD * (rD - P.rD_ref); sigma_i_CD * vD;
-                    sigma_i_E * (rE - P.rB_ref);  sigma_i_E * vE; 
-                    sigma_i_F * (rF - P.rB_ref);  sigma_i_F * vF]; 
+        ceq = [ceq; sigma_i_AB * (rA - P.rA_ref); 
+                    sigma_i_AB * (rB - P.rB_ref); 
+                    sigma_i_CD * (rC - P.rC_ref); 
+                    sigma_i_CD * (rD - P.rD_ref);
+                    sigma_i_E * (rE - P.rB_ref);  
+                    sigma_i_F * (rF - P.rB_ref)]; 
 else
     % This is a contact reduction  
-        ceq = [ceq; (sigma_offset(1)==0) * sigma_i_AB * (rA - P.rA_ref); (sigma_offset(1)==0) * sigma_i_AB * vA;
-                    (sigma_offset(1)==0) * sigma_i_AB * (rB - P.rB_ref); (sigma_offset(1)==0) * sigma_i_AB * vB;
-                    (sigma_offset(2)==0) * sigma_i_CD * (rC - P.rC_ref); (sigma_offset(2)==0) * sigma_i_CD * vC;
-                    (sigma_offset(2)==0) * sigma_i_CD * (rD - P.rD_ref); (sigma_offset(2)==0) * sigma_i_CD * vD;
-                    (sigma_offset(3)==0) * sigma_i_E *  (rE - P.rB_ref); (sigma_offset(3)==0) * sigma_i_E * vE;
-                    (sigma_offset(4)==0) * sigma_i_F *  (rF - P.rB_ref); (sigma_offset(4)==0) * sigma_i_F * vF]; 
+        ceq = [ceq; (sigma_offset(1)==0) * sigma_i_AB * (rA - P.rA_ref); 
+                    (sigma_offset(1)==0) * sigma_i_AB * (rB - P.rB_ref); 
+                    (sigma_offset(2)==0) * sigma_i_CD * (rC - P.rC_ref); 
+                    (sigma_offset(2)==0) * sigma_i_CD * (rD - P.rD_ref); 
+                    (sigma_offset(3)==0) * sigma_i_E *  (rE - P.rB_ref); 
+                    (sigma_offset(4)==0) * sigma_i_F *  (rF - P.rB_ref)]; 
 end
 %% 3. Heuristic Stability Constraints: rI and rCOM have to be lied within the support polygon
 r_Foot_Pos = [rA(1) rB(1);  rC(1) rD(1)];

@@ -1,3 +1,5 @@
 
 Snopt_Constraint_Formulation.asv
 *.asv
+*.m
+Nodes_Connectivity_Opt.m

@@ -32,7 +32,7 @@ while (exitflag~=1)&&(exitflag~=2)
 %     Single_Frame_Plot(x_i_child_Opt, P)
 end
 P.Opt0 = x_i;   % This is the goal configuratioin at this step
-% Single_Frame_Plot(P.Opt0, P);
+Single_Frame_Plot(P.Opt0, P);
 
 %% Here the desired configuration has been satisfied, then a seed control needs to be formulated
 % Then a linear interpolation can be calculated based on the sigma_i

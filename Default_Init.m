@@ -8,7 +8,7 @@ P = Envi_Map_Defi(P);
 mini = 0.05;
 P.mini = mini;
 
-rIx = 3;
+rIx = 4;
 rIy = 1;
 theta = -0.09;
 q1 = 0.45;
