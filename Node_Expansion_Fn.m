@@ -82,7 +82,7 @@ if (hand_E_contas == 0)&&(hand_F_contas == 0)
     %% 1. No contact case
     End_Hori_Max = max([rA(1), rB(1), rC(1), rD(1), rE(1), rF(1)]);
     End_Vert_Min = min([rA(2), rB(2), rC(2), rD(2), rE(2), rF(2)]);    
-    if Obs_Dist_Fn([End_Hori_Max + P.Step_Length, End_Vert_Min], P.Envi_Map)<0
+    if Obs_Dist_Fn([End_Hori_Max + P.Step_Length, End_Vert_Min], P.Envi_Map,'x')<0
         % In this case, there could be a hand collision
         sigma_i_child = sigma_modi(sigma_i, 3, 1);
         sigma_children = [sigma_children; sigma_i_child];
