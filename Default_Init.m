@@ -5,10 +5,12 @@ function [P, sigma0, x0_Opt] = Default_Init(varargin)
 load('Pre_Load_Structure.mat');
 
 P = Envi_Map_Defi(P);
-mini = 0.05;
-P.mini = mini;
 
-rIx = 4;
+sigma0 = [ 0 1 0 0 ]; 
+P.sigma0 = sigma0; 
+P.mini = 0.05;
+
+rIx = 0;
 rIy = 1;
 theta = -0.09;
 q1 = 0.45;
@@ -37,9 +39,11 @@ q8dot = -2;
 q9dot = -pi/2;
 q10dot = -1.5;
 
-x0_All = [rIx rIy theta q1 q2 q3 q4 q5 q6 q7 q8 q9 q10,...
-          rIxdot rIydot thetadot q1dot q2dot q3dot q4dot q5dot q6dot q7dot q8dot q9dot q10dot];
-P.Refer0 = x0_All;
+x0_init = [rIx rIy theta q1 q2 q3 q4 q5 q6 q7 q8 q9 q10,...
+           rIxdot rIydot thetadot q1dot q2dot q3dot q4dot q5dot q6dot q7dot q8dot q9dot q10dot];
+P.init0 = x0_init;
+
+%% Robot state bounds
 rIxlow = -Inf;                  rIxupp = Inf;
 rIylow = -Inf;                  rIyupp = Inf;
 thetalow = -pi;                 thetaupp = pi;
@@ -73,29 +77,39 @@ q9dotlow = AngRateLow;          q9dotupp = AngRateHgh;
 q10dotlow = AngRateLow;         q10dotupp = AngRateHgh;
 
 RobotState_LowBd = [rIxlow rIylow thetalow q1low q2low q3low q4low q5low q6low q7low q8low q9low q10low...
-    rIxdotlow rIydotlow thetadotlow q1dotlow q2dotlow q3dotlow q4dotlow q5dotlow q6dotlow q7dotlow q8dotlow q9dotlow q10dotlow];
+                    rIxdotlow rIydotlow thetadotlow q1dotlow q2dotlow q3dotlow q4dotlow q5dotlow q6dotlow q7dotlow q8dotlow q9dotlow q10dotlow];
 RobotState_UppBd = [rIxupp rIyupp thetaupp q1upp q2upp q3upp q4upp q5upp q6upp q7upp q8upp q9upp q10upp...
-    rIxdotupp rIydotupp thetadotupp q1dotupp q2dotupp q3dotupp q4dotupp q5dotupp q6dotupp q7dotupp q8dotupp q9dotupp q10dotupp];
+                    rIxdotupp rIydotupp thetadotupp q1dotupp q2dotupp q3dotupp q4dotupp q5dotupp q6dotupp q7dotupp q8dotupp q9dotupp q10dotupp];
 Init_Opt = optimoptions(@fmincon,'Display','off','Algorithm','sqp','MaxIterations',inf);
-% P.Init_Foot = 1;            % This is AB on the ground
-P.Init_Foot = 2;          % This is CD on the ground
+
 
 P.RobotState_LowBd = RobotState_LowBd;
 P.RobotState_UppBd = RobotState_UppBd;
 
+
+%% Upper and Lower bounds of the control variables                    
+tau1_max = 100;             tau2_max = 100;             tau3_max = 100;
+tau4_max = 100;             tau5_max = 100;             tau6_max = 100;
+tau7_max = 60;              tau8_max = 50;              tau9_max = 60;             tau10_max = 50;
+
+Ctrl_LowBd = -[tau1_max tau2_max tau3_max tau4_max tau5_max tau6_max tau7_max tau8_max tau9_max tau10_max ]';
+Ctrl_UppBd = - Ctrl_LowBd;
+
+P.Ctrl_LowBd = Ctrl_LowBd;
+P.Ctrl_UppBd = Ctrl_UppBd;
+
 P.Step_Max = P.Leg_Length * (abs(sin(q1low)) +abs(sin(q1upp)));
 
-sigma0 = [ P.Init_Foot==1 P.Init_Foot==2 0 0 ]; 
 x0_Sim = [rIy q1 q2 q3 q4 q5 q6 ...
-      rIydot q1dot q2dot q3dot q4dot q5dot q6dot]';
+          rIydot q1dot q2dot q3dot q4dot q5dot q6dot]';
+
 RobotState_LowBd_Sim = [rIylow q1low q2low q3low q4low q5low q6low rIydotlow q1dotlow q2dotlow q3dotlow q4dotlow q5dotlow q6dotlow ];
 RobotState_UppBd_Sim = [rIyupp q1upp q2upp q3upp q4upp q5upp q6upp rIydotupp q1dotupp q2dotupp q3dotupp q4dotupp q5dotupp q6dotupp ];
-x_Sim_Opt = fmincon(@Init_Obj_Sim,x0_Sim,[],[],[],[],RobotState_LowBd_Sim,RobotState_UppBd_Sim,@Init_Cons_Sim,Init_Opt, P);
-x0_Opt = State_Sim2All(x0_All, x_Sim_Opt);
+x_Sim_Opt= fmincon(@Init_Obj_Sim,x0_Sim,[],[],[],[],RobotState_LowBd_Sim,RobotState_UppBd_Sim,@Init_Cons_Sim,Init_Opt, P);
+x0_Opt = State_Sim2All(x0_init, x_Sim_Opt);
 if nargin >0 
     Single_Frame_Plot(x0_Opt, P)
 end
-
 rIx = x0_Opt(1);             rIy = x0_Opt(2);             theta = x0_Opt(3);
 q1 = x0_Opt(4);              q2 = x0_Opt(5);              q3 = x0_Opt(6);
 q4 = x0_Opt(7);              q5 = x0_Opt(8);              q6 = x0_Opt(9);
@@ -151,7 +165,7 @@ end
 
 function obj = Init_Obj_Sim(z0, P)
 
-z = P.Refer0;
+z = P.init0;
 
 rIx = z(1);             rIy = z(2);             theta = z(3);
 q1 = z(4);              q2 = z(5);              q3 = z(6);
@@ -195,13 +209,13 @@ rM = P.rM_fn(q7,rIx,rIy,theta);
 rN = P.rN_fn(q9,rIx,rIy,theta);
 rT = P.rT_fn(rIx,rIy,theta);
 
-obj = -rI(2);
+obj = -rT(2);
 end
 function [c,ceq] = Init_Cons_Sim(z0, P)
 
 c = []; ceq = [];
 
-z = P.Refer0;
+z = P.init0;
 
 rIx = z(1);             rIy = z(2);             theta = z(3);
 q1 = z(4);              q2 = z(5);              q3 = z(6);
@@ -259,22 +273,22 @@ vD = P.vD_fn(q4,q5,q6,q4dot,q5dot,q6dot,rIxdot,rIydot,thetadot,theta);
 % vL = P.vL_fn(rIxdot,rIydot,thetadot,theta);
 % vM = P.vM_fn(q7,q7dot,rIxdot,rIydot,thetadot,theta);
 % vN = P.vN_fn(q9,q9dot,rIxdot,rIydot,thetadot,theta);
-Init_Foot = P.Init_Foot;
-mini = P.mini;
-Tol = 2; 
-z0 = State_Sim2All(P.Refer0 , z0);
-if Init_Foot ==1  
-    ceq = [ceq; rA(2); rB(2); vA; vB];
-    c = [c; mini - rC(2)];
-    c = [c; mini - rD(2)];
-    c = [c; norm(P.Refer0 - z0) - Tol];
-else
-    ceq = [ceq; rC(2); rD(2); vC; vD];
-    c = [c; mini - rA(2)];
-    c = [c; mini - rB(2)];
-    c = [c; norm(P.Refer0 - z0) - Tol];
-end
 
+sigma0 = P.sigma0;
+
+ceq = [ceq ; sigma0(1) * rA(2)];
+ceq = [ceq ; sigma0(1) * rB(2)];
+ceq = [ceq ; sigma0(1) * vA];
+ceq = [ceq ; sigma0(1) * vB];
+c = [c; sigma0(1) * (eps- rC(2))];
+c = [c; sigma0(1) * (eps- rD(2))];
+
+ceq = [ceq ; sigma0(2) * rC(2)];
+ceq = [ceq ; sigma0(2) * rD(2)];
+ceq = [ceq ; sigma0(2) * vC];
+ceq = [ceq ; sigma0(2) * vD];
+c = [c; sigma0(2) * (eps- rA(2))];
+c = [c; sigma0(2) * (eps- rB(2))];
 end
 function x0_Opt = State_Sim2All(x0_All, x_Sim)
 

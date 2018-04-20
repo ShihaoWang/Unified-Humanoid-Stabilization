@@ -3,6 +3,8 @@ function [c,ceq] = Nodes_Connectivity_Constraint(z, P)
 c = []; ceq = [];
 Ctrl_No = P.Ctrl_No;
 
+mini = P.mini;
+
 t_span = [0 z(1)];
 t_intp_span = linspace(t_span(1),t_span(2),Ctrl_No);
 delta_t = t_intp_span(2) - t_intp_span(1);    
@@ -17,7 +19,9 @@ Ctrl_tot = reshape(Ctrl_tot, 10, Ctrl_No);
 
 Active_In = P.Active_In;
 
-sigma_offset = P.sigma_i_child - P.sigma_i; 
+sigma_i = P.sigma_i;
+sigma_i_child = P.sigma_i_child;
+sigma_offset = sigma_i_child - sigma_i; 
 P.sigma_offset = sigma_offset;
 
 sigma_i_child_AB = P.sigma_i_child(1);
@@ -29,6 +33,8 @@ sigma_i_AB = P.sigma_i(1);
 sigma_i_CD = P.sigma_i(2);
 sigma_i_E = P.sigma_i(3);
 sigma_i_F = P.sigma_i(4);
+
+Active_In = P.Active_In;
 
 for i = 1:Ctrl_No
     
@@ -82,6 +88,7 @@ for i = 1:Ctrl_No
     Jac_Full = P.Jac_Full_fn(q1_i,q2_i,q3_i,q4_i,q5_i,q6_i,q7_i,q8_i,q9_i,q10_i,theta_i);
     Jacdot_qdot_Full = P.Jacdot_qdot_fn(q1_i,q2_i,q3_i,q4_i,q5_i,q6_i,q7_i,q8_i,q9_i,q10_i,...
         q10dot_i,q1dot_i,q2dot_i,q3dot_i,q4dot_i,q5dot_i,q6dot_i,q7dot_i,q8dot_i,q9dot_i,thetadot_i,theta_i);
+   
     
     Jac = Jac_Full(Active_In,:);
     Jacdot_qdot = Jacdot_qdot_Full(Active_In,:);
@@ -145,12 +152,12 @@ for i = 1:Ctrl_No
     %     vM = P.vM_fn(q7_i,q7dot_i,rIxdot_i,rIydot_i,thetadot_i,theta_i);
     %     vN = P.vN_fn(q9_i,q9dot_i,rIxdot_i,rIydot_i,thetadot_i,theta_i);
     
-    c = [c; -Obs_Dist_Fn(rA, P.Envi_Map) + P.mini * ~sigma_i_AB;...
-            -Obs_Dist_Fn(rB, P.Envi_Map) + P.mini * ~sigma_i_AB;...
-            -Obs_Dist_Fn(rC, P.Envi_Map) + P.mini * ~sigma_i_CD;...
-            -Obs_Dist_Fn(rD, P.Envi_Map) + P.mini * ~sigma_i_CD;...
-            -Obs_Dist_Fn(rE, P.Envi_Map) + P.mini * ~sigma_i_E;...
-            -Obs_Dist_Fn(rF, P.Envi_Map) + P.mini * ~sigma_i_F];
+    c = [c; -Obs_Dist_Fn(rA, P.Envi_Map) + mini * ~sigma_i_AB;...
+            -Obs_Dist_Fn(rB, P.Envi_Map) + mini * ~sigma_i_AB;...
+            -Obs_Dist_Fn(rC, P.Envi_Map) + mini * ~sigma_i_CD;...
+            -Obs_Dist_Fn(rD, P.Envi_Map) + mini * ~sigma_i_CD;...
+            -Obs_Dist_Fn(rE, P.Envi_Map) + mini * ~sigma_i_E;...
+            -Obs_Dist_Fn(rF, P.Envi_Map) + mini * ~sigma_i_F];
     
     ceq = [ceq; sigma_i_AB * rA(2); 
                 sigma_i_AB * rB(2);
@@ -166,15 +173,25 @@ for i = 1:Ctrl_No
             -rE(2);...
             -rF(2)];
         
-    if i == Ctrl_No
-        ceq = [ceq; sigma_i_child_AB * rA(2);       sigma_i_child_AB * vA;...
-                    sigma_i_child_AB * rB(2);       sigma_i_child_AB * vB;...
-                    sigma_i_child_CD * rC(2);       sigma_i_child_CD * vC;...
-                    sigma_i_child_CD * rD(2);       sigma_i_child_CD * vD;...
-                    sigma_i_child_E * Obs_Dist_Fn(rE, P.Envi_Map, 'x'); sigma_i_child_E * vE;...
-                    sigma_i_child_F * Obs_Dist_Fn(rF, P.Envi_Map, 'y'); sigma_i_child_F * vF];
-    end
-    
+        if i == Ctrl_No            
+            if (max(sigma_i_child) == min(sigma_i_child))&&max(sigma_i_child) == 0
+                c = [c; norm(stateNdot_i(1:13) - P.x_i(1:13)) - 10*mini];
+                c = [c; sigma_offset(1) * vA(2);...
+                        sigma_offset(1) * vB(2);...
+                        sigma_offset(2) * vC(2);...
+                        sigma_offset(2) * vD(2);...
+                        -sigma_offset(3) * vE(1);...
+                        -sigma_offset(4) * vF(1)];
+            end   
+            
+            ceq = [ceq; sigma_i_child_AB * rA(2);       sigma_i_child_AB * vA;...
+                        sigma_i_child_AB * rB(2);       sigma_i_child_AB * vB;...
+                        sigma_i_child_CD * rC(2);       sigma_i_child_CD * vC;...
+                        sigma_i_child_CD * rD(2);       sigma_i_child_CD * vD;...
+                        sigma_i_child_E * Obs_Dist_Fn(rE, P.Envi_Map, 'x'); sigma_i_child_E * vE;...
+                        sigma_i_child_F * Obs_Dist_Fn(rF, P.Envi_Map, 'y'); sigma_i_child_F * vF];
+        end
+        
     %% 4. Holonomic constraint reserved
     if max(sigma_offset)==1
         % This is a contact addition
@@ -186,45 +203,128 @@ for i = 1:Ctrl_No
                     sigma_i_F *  (rF - P.rF_ref)];
     else
         % This is a contact reduction
-        ceq = [ceq; (sigma_offset(1)==0) * sigma_i_AB * (rA - P.rA_ref); 
-                    (sigma_offset(1)==0) * sigma_i_AB * (rB - P.rB_ref); 
-                    (sigma_offset(2)==0) * sigma_i_CD * (rC - P.rC_ref);
-                    (sigma_offset(2)==0) * sigma_i_CD * (rD - P.rD_ref); 
-                    (sigma_offset(3)==0) * sigma_i_E *  (rE - P.rB_ref); 
-                    (sigma_offset(4)==0) * sigma_i_F *  (rF - P.rB_ref)];
+        ceq = [ceq; (sigma_offset(1)==0) * sigma_i_AB * (rA - P.rA_ref);
+            (sigma_offset(1)==0) * sigma_i_AB * (rB - P.rB_ref);
+            (sigma_offset(2)==0) * sigma_i_CD * (rC - P.rC_ref);
+            (sigma_offset(2)==0) * sigma_i_CD * (rD - P.rD_ref);
+            (sigma_offset(3)==0) * sigma_i_E *  (rE - P.rB_ref);
+            (sigma_offset(4)==0) * sigma_i_F *  (rF - P.rB_ref)];
     end
     %% 5. Heuristic Constraint
     r_Foot_Pos = [rA(1) rB(1);
         rC(1) rD(1)];
     rCOM = P.rCOM_fn(q1_i,q2_i,q3_i,q4_i,q5_i,q6_i,q7_i,q8_i,q9_i,q10_i,rIx_i,rIy_i,theta_i);
-    if find(sigma_offset)<3
-        % There is a change of the foot contact point
-        if (P.vI_ref(1)>0)
-            % The robot is moving forward
-            [~,n] = max(sigma_offset);
-            Swing_Leg_Ind = n;
-            Stance_Leg_Ind = (Swing_Leg_Ind == 1)+ 1;
-            Swing_Leg_Dis = min(r_Foot_Pos(Swing_Leg_Ind,:));
-            Stance_Leg_Dis = max(r_Foot_Pos(Stance_Leg_Ind,:));
-            c = [c; Stance_Leg_Dis - Swing_Leg_Dis];
-            c = [c; min(r_Foot_Pos(Stance_Leg_Ind,:)) - rI(1);...
-                    rI(1) - max(r_Foot_Pos(Swing_Leg_Ind,:))];
-            c = [c; min(r_Foot_Pos(Stance_Leg_Ind,:)) - rCOM(1);...
-                    rCOM(1) - max(r_Foot_Pos(Swing_Leg_Ind,:))];
-        else
-            [~,n] = max(sigma_offset);
-            Swing_Leg_Ind = n;
-            Stance_Leg_Ind = (Swing_Leg_Ind == 1)+ 1;
-            Swing_Leg_Dis = max(r_Foot_Pos(Swing_Leg_Ind,:));
-            Stance_Leg_Dis = min(r_Foot_Pos(Stance_Leg_Ind,:));
-            c = [c; -Stance_Leg_Dis + Swing_Leg_Dis];
-            c = [c; -max(r_Foot_Pos(Stance_Leg_Ind,:)) + rI(1);...
-                    -rI(1) + min(r_Foot_Pos(Swing_Leg_Ind,:))];
-            c = [c; -max(r_Foot_Pos(Stance_Leg_Ind,:)) + rCOM(1);...
-                    -rrCOM(1) + min(r_Foot_Pos(Swing_Leg_Ind,:))];
+    
+    if (max(sigma_i) == min(sigma_i))&&(max(sigma_i) == 0)
+        % There is no contact in the parent mode
+        % So the robot is jumping in the air so the idea is to make sure that the center of mass align
+        % with the neck position in the horizontal direction
+        ceq = [ceq; rCOM(1) - rT(1)];
+    else
+        % There is at least one contact in the parent mode
+        if(sigma_i(1)==1)||(sigma_i(2)==1)
+            % At least foot contact is involved
+            if sum(sigma_offset)>0
+                if find(sigma_offset)<3
+                    % The change is also foot contact
+                    if (P.vI_ref(1)>0)
+                        % The robot is moving forward
+                        [~,n] = find(sigma_offset);
+                        Swing_Leg_Ind = n;
+                        Stance_Leg_Ind = (Swing_Leg_Ind == 1)+ 1;
+                        Swing_Leg_Dis = min(r_Foot_Pos(Swing_Leg_Ind,:));
+                        Stance_Leg_Dis = max(r_Foot_Pos(Stance_Leg_Ind,:));
+                        c = [c; Stance_Leg_Dis - Swing_Leg_Dis];
+                        c = [c; min(r_Foot_Pos(Stance_Leg_Ind,:)) - rI(1);...
+                            rI(1) - max(r_Foot_Pos(Swing_Leg_Ind,:))];
+                        c = [c; min(r_Foot_Pos(Stance_Leg_Ind,:)) - rCOM(1);...
+                            rCOM(1) - max(r_Foot_Pos(Swing_Leg_Ind,:))];
+%                         c = [c; min(rI(1),rCOM(1)) - rT(1);...
+%                             rT(1) - max(rI(1),rCOM(2))];
+                    else
+                        [~,n] = find(sigma_offset);
+                        Swing_Leg_Ind = n;
+                        Stance_Leg_Ind = (Swing_Leg_Ind == 1)+ 1;
+                        Swing_Leg_Dis = max(r_Foot_Pos(Swing_Leg_Ind,:));
+                        Stance_Leg_Dis = min(r_Foot_Pos(Stance_Leg_Ind,:));
+                        c = [c; -Stance_Leg_Dis + Swing_Leg_Dis];
+                        c = [c; -max(r_Foot_Pos(Stance_Leg_Ind,:)) + rI(1);...
+                            -rI(1) + min(r_Foot_Pos(Swing_Leg_Ind,:))];
+                        c = [c; -max(r_Foot_Pos(Stance_Leg_Ind,:)) + rCOM(1);...
+                            -rCOM(1) + min(r_Foot_Pos(Swing_Leg_Ind,:))];
+%                         c = [c; min(rI(1),rCOM(1)) - rT(1);...
+%                             rT(1) - max(rI(1),rCOM(2))];
+                    end
+                else
+                    ceq = [ceq; rCOM(1) - rT(1)];
+                end
+            else
+                if  sum(sigma_offset)== 0
+                    % In this case, we are doing the same mode optimization and we
+                    % would like the center of mass and rI to be within the support polygon
+                    if sum(sigma_i(1:2))==2
+                        c = [c; min(r_Foot_Pos(:)) - rI(1);...
+                            rI(1) - max(r_Foot_Pos(:))];
+                        c = [c; min(r_Foot_Pos(:)) - rCOM(1);...
+                            rCOM(1) - max(r_Foot_Pos(:))];
+                        %                     c = [c; min(rI(1),rCOM(1)) - rT(1);...
+                        %                         rT(1) - max(rI(1),rCOM(2))];
+                    else
+                        [~,n] = find(sigma_i(1:2));
+                        Stance_Leg_Min = min(r_Foot_Pos(n,:));
+                        Stance_Leg_Max = max(r_Foot_Pos(n,:));
+                        c = [c; Stance_Leg_Min - rI(1);...
+                            rI(1) - Stance_Leg_Max];
+                        c = [c; Stance_Leg_Min - rCOM(1);...
+                            rCOM(1) - Stance_Leg_Max];
+                        %                     c = [c; min(rI(1),rCOM(1)) - rT(1);...
+                        %                         rT(1) - max(rI(1),rCOM(2))];
+                    end
+                else
+                    % This is the departure mode, the configuration should be
+                    % the same while the velocity at certain point should be in
+                    % the leaving direction
+                    
+                    c = [c; sigma_offset(1) * vA(2);...
+                        sigma_offset(1) * vB(2);...
+                        sigma_offset(2) * vC(2);...
+                        sigma_offset(2) * vD(2);...
+                        -sigma_offset(3) * vE(1);...
+                        -sigma_offset(4) * vF(1)];
+                end
+            end
         end
-        
     end
+    
+%     if find(sigma_offset)<3
+%         % There is a change of the foot contact point
+%         if (P.vI_ref(1)>0)
+%             % The robot is moving forward
+%             [~,n] = max(sigma_offset);
+%             Swing_Leg_Ind = n;
+%             Stance_Leg_Ind = (Swing_Leg_Ind == 1)+ 1;
+%             Swing_Leg_Dis = min(r_Foot_Pos(Swing_Leg_Ind,:));
+%             Stance_Leg_Dis = max(r_Foot_Pos(Stance_Leg_Ind,:));
+%             c = [c; Stance_Leg_Dis - Swing_Leg_Dis];
+%             c = [c; min(r_Foot_Pos(Stance_Leg_Ind,:)) - rI(1);...
+%                     rI(1) - max(r_Foot_Pos(Swing_Leg_Ind,:))];
+%             c = [c; min(r_Foot_Pos(Stance_Leg_Ind,:)) - rCOM(1);...
+%                     rCOM(1) - max(r_Foot_Pos(Swing_Leg_Ind,:))];
+%         else
+%             [~,n] = max(sigma_offset);
+%             Swing_Leg_Ind = n;
+%             Stance_Leg_Ind = (Swing_Leg_Ind == 1)+ 1;
+%             Swing_Leg_Dis = max(r_Foot_Pos(Swing_Leg_Ind,:));
+%             Stance_Leg_Dis = min(r_Foot_Pos(Stance_Leg_Ind,:));
+%             c = [c; -Stance_Leg_Dis + Swing_Leg_Dis];
+%             c = [c; -max(r_Foot_Pos(Stance_Leg_Ind,:)) + rI(1);...
+%                     -rI(1) + min(r_Foot_Pos(Swing_Leg_Ind,:))];
+%             c = [c; -max(r_Foot_Pos(Stance_Leg_Ind,:)) + rCOM(1);...
+%                     -rrCOM(1) + min(r_Foot_Pos(Swing_Leg_Ind,:))];
+%         end
+%         
+%     end
+       
 end
 
 end
