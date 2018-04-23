@@ -1,6 +1,7 @@
 function Keyframe_Interpolater()
-load('3rdrun.mat');
+load('7thrun.mat');
 % This function is used to interpolate the given keyframes to a smooth traj
+Var_Opt = z
 Frame_No = (length(Var_Opt) - 1)/36;
 Time = Var_Opt(1);
 State_Traj = Var_Opt(2:26*Frame_No+1,:);
@@ -8,7 +9,7 @@ State_Traj = reshape(State_Traj, 26, length(State_Traj)/26);
 Ctrl_Traj = Var_Opt(26*Frame_No+2:end,:);
 Ctrl_Traj = reshape(Ctrl_Traj, 10, length(Ctrl_Traj)/10);
 
-Exp_Rate = 5;Time_Span = linspace(0,Time, Frame_No);
+Exp_Rate = 10;Time_Span = linspace(0,Time, Frame_No);
 Time_Span_Inte = linspace(0, Time, Exp_Rate * Frame_No);
 
 State_Traj_Inte = spline(Time_Span, State_Traj,Time_Span_Inte);
@@ -17,7 +18,7 @@ Ctrl_Traj_Inte = spline(Time_Span, Ctrl_Traj,Time_Span_Inte);
 %% HRP2 path file generation
 Path_File = []; 
 
-filename = ['hrp2_' num2str(Exp_Rate) 'x.path'];
+filename = ['hrp2_7_' num2str(Exp_Rate) 'x.path'];
 
 fid = fopen(filename,'wt');
 

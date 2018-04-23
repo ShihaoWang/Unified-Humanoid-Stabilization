@@ -210,91 +210,91 @@ for i = 1:Ctrl_No
             (sigma_offset(3)==0) * sigma_i_E *  (rE - P.rB_ref);
             (sigma_offset(4)==0) * sigma_i_F *  (rF - P.rB_ref)];
     end
-    %% 5. Heuristic Constraint
-    r_Foot_Pos = [rA(1) rB(1);
-        rC(1) rD(1)];
-    rCOM = P.rCOM_fn(q1_i,q2_i,q3_i,q4_i,q5_i,q6_i,q7_i,q8_i,q9_i,q10_i,rIx_i,rIy_i,theta_i);
-    
-    if (max(sigma_i) == min(sigma_i))&&(max(sigma_i) == 0)
-        % There is no contact in the parent mode
-        % So the robot is jumping in the air so the idea is to make sure that the center of mass align
-        % with the neck position in the horizontal direction
-        ceq = [ceq; rCOM(1) - rT(1)];
-    else
-        % There is at least one contact in the parent mode
-        if(sigma_i(1)==1)||(sigma_i(2)==1)
-            % At least foot contact is involved
-            if sum(sigma_offset)>0
-                if find(sigma_offset)<3
-                    % The change is also foot contact
-                    if (P.vI_ref(1)>0)
-                        % The robot is moving forward
-                        [~,n] = find(sigma_offset);
-                        Swing_Leg_Ind = n;
-                        Stance_Leg_Ind = (Swing_Leg_Ind == 1)+ 1;
-                        Swing_Leg_Dis = min(r_Foot_Pos(Swing_Leg_Ind,:));
-                        Stance_Leg_Dis = max(r_Foot_Pos(Stance_Leg_Ind,:));
-                        c = [c; Stance_Leg_Dis - Swing_Leg_Dis];
-                        c = [c; min(r_Foot_Pos(Stance_Leg_Ind,:)) - rI(1);...
-                            rI(1) - max(r_Foot_Pos(Swing_Leg_Ind,:))];
-                        c = [c; min(r_Foot_Pos(Stance_Leg_Ind,:)) - rCOM(1);...
-                            rCOM(1) - max(r_Foot_Pos(Swing_Leg_Ind,:))];
-%                         c = [c; min(rI(1),rCOM(1)) - rT(1);...
-%                             rT(1) - max(rI(1),rCOM(2))];
-                    else
-                        [~,n] = find(sigma_offset);
-                        Swing_Leg_Ind = n;
-                        Stance_Leg_Ind = (Swing_Leg_Ind == 1)+ 1;
-                        Swing_Leg_Dis = max(r_Foot_Pos(Swing_Leg_Ind,:));
-                        Stance_Leg_Dis = min(r_Foot_Pos(Stance_Leg_Ind,:));
-                        c = [c; -Stance_Leg_Dis + Swing_Leg_Dis];
-                        c = [c; -max(r_Foot_Pos(Stance_Leg_Ind,:)) + rI(1);...
-                            -rI(1) + min(r_Foot_Pos(Swing_Leg_Ind,:))];
-                        c = [c; -max(r_Foot_Pos(Stance_Leg_Ind,:)) + rCOM(1);...
-                            -rCOM(1) + min(r_Foot_Pos(Swing_Leg_Ind,:))];
-%                         c = [c; min(rI(1),rCOM(1)) - rT(1);...
-%                             rT(1) - max(rI(1),rCOM(2))];
-                    end
-                else
-                    ceq = [ceq; rCOM(1) - rT(1)];
-                end
-            else
-                if  sum(sigma_offset)== 0
-                    % In this case, we are doing the same mode optimization and we
-                    % would like the center of mass and rI to be within the support polygon
-                    if sum(sigma_i(1:2))==2
-                        c = [c; min(r_Foot_Pos(:)) - rI(1);...
-                            rI(1) - max(r_Foot_Pos(:))];
-                        c = [c; min(r_Foot_Pos(:)) - rCOM(1);...
-                            rCOM(1) - max(r_Foot_Pos(:))];
-                        %                     c = [c; min(rI(1),rCOM(1)) - rT(1);...
-                        %                         rT(1) - max(rI(1),rCOM(2))];
-                    else
-                        [~,n] = find(sigma_i(1:2));
-                        Stance_Leg_Min = min(r_Foot_Pos(n,:));
-                        Stance_Leg_Max = max(r_Foot_Pos(n,:));
-                        c = [c; Stance_Leg_Min - rI(1);...
-                            rI(1) - Stance_Leg_Max];
-                        c = [c; Stance_Leg_Min - rCOM(1);...
-                            rCOM(1) - Stance_Leg_Max];
-                        %                     c = [c; min(rI(1),rCOM(1)) - rT(1);...
-                        %                         rT(1) - max(rI(1),rCOM(2))];
-                    end
-                else
-                    % This is the departure mode, the configuration should be
-                    % the same while the velocity at certain point should be in
-                    % the leaving direction
-                    
-                    c = [c; sigma_offset(1) * vA(2);...
-                        sigma_offset(1) * vB(2);...
-                        sigma_offset(2) * vC(2);...
-                        sigma_offset(2) * vD(2);...
-                        -sigma_offset(3) * vE(1);...
-                        -sigma_offset(4) * vF(1)];
-                end
-            end
-        end
-    end
+%     %% 5. Heuristic Constraint
+%     r_Foot_Pos = [rA(1) rB(1);
+%         rC(1) rD(1)];
+%     rCOM = P.rCOM_fn(q1_i,q2_i,q3_i,q4_i,q5_i,q6_i,q7_i,q8_i,q9_i,q10_i,rIx_i,rIy_i,theta_i);
+%     
+%     if (max(sigma_i) == min(sigma_i))&&(max(sigma_i) == 0)
+%         % There is no contact in the parent mode
+%         % So the robot is jumping in the air so the idea is to make sure that the center of mass align
+%         % with the neck position in the horizontal direction
+%         ceq = [ceq; rCOM(1) - rT(1)];
+%     else
+%         % There is at least one contact in the parent mode
+%         if(sigma_i(1)==1)||(sigma_i(2)==1)
+%             % At least foot contact is involved
+%             if sum(sigma_offset)>0
+%                 if find(sigma_offset)<3
+%                     % The change is also foot contact
+%                     if (P.vI_ref(1)>0)
+%                         % The robot is moving forward
+%                         [~,n] = find(sigma_offset);
+%                         Swing_Leg_Ind = n;
+%                         Stance_Leg_Ind = (Swing_Leg_Ind == 1)+ 1;
+%                         Swing_Leg_Dis = min(r_Foot_Pos(Swing_Leg_Ind,:));
+%                         Stance_Leg_Dis = max(r_Foot_Pos(Stance_Leg_Ind,:));
+%                         c = [c; Stance_Leg_Dis - Swing_Leg_Dis];
+%                         c = [c; min(r_Foot_Pos(Stance_Leg_Ind,:)) - rI(1);...
+%                             rI(1) - max(r_Foot_Pos(Swing_Leg_Ind,:))];
+%                         c = [c; min(r_Foot_Pos(Stance_Leg_Ind,:)) - rCOM(1);...
+%                             rCOM(1) - max(r_Foot_Pos(Swing_Leg_Ind,:))];
+% %                         c = [c; min(rI(1),rCOM(1)) - rT(1);...
+% %                             rT(1) - max(rI(1),rCOM(2))];
+%                     else
+%                         [~,n] = find(sigma_offset);
+%                         Swing_Leg_Ind = n;
+%                         Stance_Leg_Ind = (Swing_Leg_Ind == 1)+ 1;
+%                         Swing_Leg_Dis = max(r_Foot_Pos(Swing_Leg_Ind,:));
+%                         Stance_Leg_Dis = min(r_Foot_Pos(Stance_Leg_Ind,:));
+%                         c = [c; -Stance_Leg_Dis + Swing_Leg_Dis];
+%                         c = [c; -max(r_Foot_Pos(Stance_Leg_Ind,:)) + rI(1);...
+%                             -rI(1) + min(r_Foot_Pos(Swing_Leg_Ind,:))];
+%                         c = [c; -max(r_Foot_Pos(Stance_Leg_Ind,:)) + rCOM(1);...
+%                             -rCOM(1) + min(r_Foot_Pos(Swing_Leg_Ind,:))];
+% %                         c = [c; min(rI(1),rCOM(1)) - rT(1);...
+% %                             rT(1) - max(rI(1),rCOM(2))];
+%                     end
+%                 else
+%                     ceq = [ceq; rCOM(1) - rT(1)];
+%                 end
+%             else
+%                 if  sum(sigma_offset)== 0
+%                     % In this case, we are doing the same mode optimization and we
+%                     % would like the center of mass and rI to be within the support polygon
+%                     if sum(sigma_i(1:2))==2
+%                         c = [c; min(r_Foot_Pos(:)) - rI(1);...
+%                             rI(1) - max(r_Foot_Pos(:))];
+%                         c = [c; min(r_Foot_Pos(:)) - rCOM(1);...
+%                             rCOM(1) - max(r_Foot_Pos(:))];
+%                         %                     c = [c; min(rI(1),rCOM(1)) - rT(1);...
+%                         %                         rT(1) - max(rI(1),rCOM(2))];
+%                     else
+%                         [~,n] = find(sigma_i(1:2));
+%                         Stance_Leg_Min = min(r_Foot_Pos(n,:));
+%                         Stance_Leg_Max = max(r_Foot_Pos(n,:));
+%                         c = [c; Stance_Leg_Min - rI(1);...
+%                             rI(1) - Stance_Leg_Max];
+%                         c = [c; Stance_Leg_Min - rCOM(1);...
+%                             rCOM(1) - Stance_Leg_Max];
+%                         %                     c = [c; min(rI(1),rCOM(1)) - rT(1);...
+%                         %                         rT(1) - max(rI(1),rCOM(2))];
+%                     end
+%                 else
+%                     % This is the departure mode, the configuration should be
+%                     % the same while the velocity at certain point should be in
+%                     % the leaving direction
+%                     
+%                     c = [c; sigma_offset(1) * vA(2);...
+%                         sigma_offset(1) * vB(2);...
+%                         sigma_offset(2) * vC(2);...
+%                         sigma_offset(2) * vD(2);...
+%                         -sigma_offset(3) * vE(1);...
+%                         -sigma_offset(4) * vF(1)];
+%                 end
+%             end
+%         end
+%     end
     
 %     if find(sigma_offset)<3
 %         % There is a change of the foot contact point
