@@ -14,7 +14,7 @@ RobotState_UppBd = P.RobotState_UppBd;
 Ctrl_LowBd = P.Ctrl_LowBd;
 Ctrl_UppBd = P.Ctrl_UppBd;
 
-Seed_Opt = optimoptions(@fmincon,'Display','off','Algorithm','sqp','MaxIterations',inf,'OptimalityTolerance',1e-8,'MaxFunctionEvaluations',inf);
+Seed_Opt = optimoptions(@fmincon,'Display','iter','Algorithm','sqp','MaxIterations',inf,'OptimalityTolerance',1e-8,'MaxFunctionEvaluations',inf);
 Flag = 1;
 % Here an iterative optimization idea is adopted to minimize the difference
 % between the new optimized translation to the initial translation position

@@ -6,8 +6,9 @@ StateNdot_tot = stateNdot_ref(1:13*2*Ctrl_No,:);
 
 StateNdot_tot = reshape(StateNdot_tot, 26, Ctrl_No);
 T = 0;
-for i = 1:Ctrl_No   
-    x_i = StateNdot_tot(:,i);    
+% for i = 1:Ctrl_No   
+for i = 1:1   
+    x_i = StateNdot_tot(:,end);    
     rIx = x_i(1);             rIy = x_i(2);             theta = x_i(3);
     q1 = x_i(4);              q2 = x_i(5);              q3 = x_i(6);
     q4 = x_i(7);              q5 = x_i(8);              q6 = x_i(9);

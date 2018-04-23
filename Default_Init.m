@@ -6,11 +6,11 @@ load('Pre_Load_Structure.mat');
 
 P = Envi_Map_Defi(P);
 
-sigma0 = [ 0 1 0 0 ]; 
+sigma0 = [ 1 0 0 0 ]; 
 P.sigma0 = sigma0; 
 P.mini = 0.05;
 
-rIx = 0;
+rIx = 4.2;
 rIy = 1;
 theta = -0.09;
 q1 = 0.45;
