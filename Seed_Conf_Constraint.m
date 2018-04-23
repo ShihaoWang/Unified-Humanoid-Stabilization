@@ -119,7 +119,7 @@ else
                     c = [c; min(r_Foot_Pos(Stance_Leg_Ind,:)) - rCOM(1);...
                         rCOM(1) - max(r_Foot_Pos(Swing_Leg_Ind,:))];
                     c = [c; min(rI(1),rCOM(1)) - rT(1);...
-                            rT(1) - max(rI(1),rCOM(2))];
+                            rT(1) - max(rI(1),rCOM(1))];
                 else
                     [~,n] = find(sigma_offset);
                     Swing_Leg_Ind = n;
@@ -132,7 +132,7 @@ else
                     c = [c; -max(r_Foot_Pos(Stance_Leg_Ind,:)) + rCOM(1);...
                         -rCOM(1) + min(r_Foot_Pos(Swing_Leg_Ind,:))];
                     c = [c; min(rI(1),rCOM(1)) - rT(1);...
-                           rT(1) - max(rI(1),rCOM(2))];
+                           rT(1) - max(rI(1),rCOM(1))];
                 end
             else
                 ceq = [ceq; rCOM(1) - rT(1)];
@@ -147,7 +147,7 @@ else
                     c = [c; min(r_Foot_Pos(:)) - rCOM(1);...
                         rCOM(1) - max(r_Foot_Pos(:))];
 %                     c = [c; min(rI(1),rCOM(1)) - rT(1);...
-%                         rT(1) - max(rI(1),rCOM(2))];
+%                         rT(1) - max(rI(1),rCOM(1))];
                 else
                     [~,n] = find(sigma_i(1:2));
                     Stance_Leg_Min = min(r_Foot_Pos(n,:));
@@ -157,7 +157,7 @@ else
                     c = [c; Stance_Leg_Min - rCOM(1);...
                         rCOM(1) - Stance_Leg_Max];
 %                     c = [c; min(rI(1),rCOM(1)) - rT(1);...
-%                         rT(1) - max(rI(1),rCOM(2))];
+%                         rT(1) - max(rI(1),rCOM(1))];
                 end
             else
                 % This is the departure mode, the configuration should be
